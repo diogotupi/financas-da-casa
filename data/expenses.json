@@ -1,13 +1,5 @@
 [
   {
-    "id": "828ea6d9-7904-4198-afce-f004bfb95dc0",
-    "description": "Varal de Teto",
-    "amount": 120,
-    "paidBy": "camila",
-    "date": "2026-06-02",
-    "settled": false
-  },
-  {
     "id": "1995152b-60ee-40bd-a590-c1d52aa61494",
     "description": "Conta de Luz",
     "amount": 477.56,
