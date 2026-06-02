@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "id": "1995152b-60ee-40bd-a590-c1d52aa61494",
+    "description": "Conta de Luz",
+    "amount": 477.56,
+    "paidBy": "diogo",
+    "date": "2026-06-02",
+    "settled": false
+  }
+]
