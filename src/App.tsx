@@ -8,8 +8,16 @@ import { PEOPLE } from './types'
 import './App.css'
 
 function App() {
-  const { expenses, loading, synced, error, addExpense, toggleSettled, removeExpense } =
-    useExpenses()
+  const {
+    expenses,
+    loading,
+    synced,
+    error,
+    addExpense,
+    toggleSettled,
+    removeExpense,
+    updateExpense,
+  } = useExpenses()
   const disabled = loading || !!error
 
   return (
@@ -45,6 +53,7 @@ function App() {
           expenses={expenses}
           onToggleSettled={toggleSettled}
           onRemove={removeExpense}
+          onUpdate={updateExpense}
           disabled={disabled}
         />
       </main>

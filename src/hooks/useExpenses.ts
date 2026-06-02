@@ -130,6 +130,37 @@ export function useExpenses() {
     [persist],
   )
 
+  const updateExpense = useCallback(
+    async (
+      id: string,
+      patch: { description?: string; amount?: number },
+    ) => {
+      const current = expensesRef.current.find((e) => e.id === id)
+      if (!current) return
+
+      const description =
+        patch.description !== undefined
+          ? patch.description.trim()
+          : current.description
+      const amount = patch.amount !== undefined ? patch.amount : current.amount
+
+      if (!description || amount <= 0) return
+
+      if (
+        description === current.description &&
+        amount === current.amount
+      ) {
+        return
+      }
+
+      const next = expensesRef.current.map((e) =>
+        e.id === id ? { ...e, description, amount } : e,
+      )
+      await persist(next)
+    },
+    [persist],
+  )
+
   return {
     expenses,
     loading,
@@ -138,5 +169,6 @@ export function useExpenses() {
     addExpense,
     toggleSettled,
     removeExpense,
+    updateExpense,
   }
 }
