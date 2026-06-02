@@ -1,53 +1,85 @@
+import type { Area } from 'react-easy-crop'
+
 const MAX_BYTES = 280_000
+const OUTPUT_SIZE = 256
 
-export function compressImageFile(file: File): Promise<string> {
+function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
-    if (!file.type.startsWith('image/')) {
-      reject(new Error('Escolha um arquivo de imagem'))
-      return
-    }
+    const image = new Image()
+    image.addEventListener('load', () => resolve(image))
+    image.addEventListener('error', () => reject(new Error('Não foi possível ler a imagem')))
+    image.src = src
+  })
+}
 
-    const url = URL.createObjectURL(file)
+export async function getCroppedImageDataUrl(
+  imageSrc: string,
+  pixelCrop: Area,
+): Promise<string> {
+  const image = await loadImage(imageSrc)
+  const canvas = document.createElement('canvas')
+  canvas.width = pixelCrop.width
+  canvas.height = pixelCrop.height
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('Não foi possível processar a imagem')
+
+  ctx.drawImage(
+    image,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    pixelCrop.width,
+    pixelCrop.height,
+  )
+
+  return canvas.toDataURL('image/jpeg', 0.92)
+}
+
+export function compressDataUrl(dataUrl: string): Promise<string> {
+  return new Promise((resolve, reject) => {
     const img = new Image()
-
     img.onload = () => {
-      URL.revokeObjectURL(url)
-      const size = 256
       const canvas = document.createElement('canvas')
-      canvas.width = size
-      canvas.height = size
+      canvas.width = OUTPUT_SIZE
+      canvas.height = OUTPUT_SIZE
       const ctx = canvas.getContext('2d')
       if (!ctx) {
         reject(new Error('Não foi possível processar a imagem'))
         return
       }
 
-      const scale = Math.max(size / img.width, size / img.height)
+      const scale = Math.max(OUTPUT_SIZE / img.width, OUTPUT_SIZE / img.height)
       const w = img.width * scale
       const h = img.height * scale
-      ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h)
+      ctx.drawImage(img, (OUTPUT_SIZE - w) / 2, (OUTPUT_SIZE - h) / 2, w, h)
 
       let quality = 0.88
-      let dataUrl = canvas.toDataURL('image/jpeg', quality)
+      let result = canvas.toDataURL('image/jpeg', quality)
 
-      while (dataUrl.length > MAX_BYTES && quality > 0.4) {
+      while (result.length > MAX_BYTES && quality > 0.4) {
         quality -= 0.08
-        dataUrl = canvas.toDataURL('image/jpeg', quality)
+        result = canvas.toDataURL('image/jpeg', quality)
       }
 
-      if (dataUrl.length > MAX_BYTES) {
+      if (result.length > MAX_BYTES) {
         reject(new Error('Imagem muito grande. Tente outra foto.'))
         return
       }
 
-      resolve(dataUrl)
+      resolve(result)
     }
-
-    img.onerror = () => {
-      URL.revokeObjectURL(url)
-      reject(new Error('Não foi possível ler a imagem'))
-    }
-
-    img.src = url
+    img.onerror = () => reject(new Error('Não foi possível ler a imagem'))
+    img.src = dataUrl
   })
+}
+
+export async function processProfileImage(
+  imageSrc: string,
+  pixelCrop: Area,
+): Promise<string> {
+  const cropped = await getCroppedImageDataUrl(imageSrc, pixelCrop)
+  return compressDataUrl(cropped)
 }

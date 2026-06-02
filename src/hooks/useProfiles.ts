@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { compressImageFile } from '../lib/image'
 import { fetchProfiles, isSyncConfigured, saveProfiles } from '../lib/sync'
 import type { Person, Profiles } from '../types'
 
@@ -33,22 +32,18 @@ export function useProfiles() {
     return () => clearInterval(id)
   }, [pull])
 
-  const uploadPhoto = useCallback(
-    async (person: Person, file: File) => {
-      setUploading(person)
-      savingRef.current = true
-      try {
-        const dataUrl = await compressImageFile(file)
-        const next = { ...profilesRef.current, [person]: dataUrl }
-        setProfiles(next)
-        await saveProfiles(next)
-      } finally {
-        savingRef.current = false
-        setUploading(null)
-      }
-    },
-    [],
-  )
+  const uploadPhoto = useCallback(async (person: Person, dataUrl: string) => {
+    setUploading(person)
+    savingRef.current = true
+    try {
+      const next = { ...profilesRef.current, [person]: dataUrl }
+      setProfiles(next)
+      await saveProfiles(next)
+    } finally {
+      savingRef.current = false
+      setUploading(null)
+    }
+  }, [])
 
   return { profiles, uploading, uploadPhoto }
 }
