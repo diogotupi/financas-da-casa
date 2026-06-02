@@ -5,50 +5,35 @@
 }
 
 :root {
-  /* Capaz Tattoo palette */
-  --black: #0a0a0a;
-  --black-soft: #141414;
-  --gray-dark: #1f1f1f;
-  --gray: #6b6b6b;
-  --gray-light: #a8a8a8;
-  --white: #f5f5f0;
-  --white-pure: #ffffff;
-  --wine: #820006;
-  --wine-hover: #a30008;
-  --border: rgba(245, 245, 240, 0.12);
-  --border-light: rgba(10, 10, 10, 0.12);
-
-  --bg: var(--black);
-  --bg-card: var(--gray-dark);
-  --bg-elevated: var(--black-soft);
-  --text: var(--white);
-  --text-muted: var(--gray-light);
-  --border-ui: var(--border);
-  --accent: var(--wine);
-  --accent-soft: rgba(130, 0, 6, 0.2);
-  --success: var(--gray-light);
-  --success-soft: rgba(168, 168, 168, 0.12);
-  --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.55);
-  --radius: 0;
-  --radius-sm: 0;
-  --font-body: 'Futura', 'Futura PT', 'Century Gothic', 'Trebuchet MS', 'Segoe UI', sans-serif;
-  --font-display: 'Cormorant Garamond', Georgia, serif;
-  --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --bg: #faf6f0;
+  --bg-card: #ffffff;
+  --text: #3d3832;
+  --text-muted: #7a7268;
+  --border: #e8e0d4;
+  --accent: #c45c4a;
+  --accent-soft: rgba(196, 92, 74, 0.12);
+  --green: #5b8a72;
+  --green-soft: rgba(91, 138, 114, 0.15);
+  --shadow: 0 4px 24px rgba(61, 56, 50, 0.08);
+  --shadow-lg: 0 12px 40px rgba(61, 56, 50, 0.12);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --font: 'DM Sans', system-ui, sans-serif;
+  --font-display: 'DM Sans', system-ui, sans-serif;
 }
 
 html {
   font-size: 16px;
-  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
-  font-family: var(--font-body);
-  font-size: 1rem;
-  line-height: 1.65;
+  font-family: var(--font);
   color: var(--text);
   background: var(--bg);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(196, 92, 74, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(91, 138, 114, 0.06), transparent);
   min-height: 100svh;
   -webkit-font-smoothing: antialiased;
 }
@@ -63,14 +48,14 @@ input {
 }
 
 input[type='date'] {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 h1,
 h2,
 h3 {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text);
   margin: 0;
 }

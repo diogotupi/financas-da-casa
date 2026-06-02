@@ -23,12 +23,11 @@ function App() {
   return (
     <div className="app">
       <header className="hero">
-        <p className="hero-badge">casa compartilhada</p>
-        <h1 className="hero-title">
-          <span className="hero-title-line">Finanças</span>
-          <span className="hero-title-line hero-title-accent">da Casa</span>
-        </h1>
-        <p className="hero-sub">Diogo & Camila — meio a meio</p>
+        <div className="hero-badge">nosso cantinho</div>
+        <h1>Finanças da Casa</h1>
+        <p className="hero-sub">
+          Diogo & Camila — dividindo tudo meio a meio, sem stress
+        </p>
         <div className="hero-avatars">
           {(['diogo', 'camila'] as const).map((p) => (
             <div
@@ -59,8 +58,7 @@ function App() {
       </main>
 
       <footer className="footer">
-        <span className="footer-brand">CAPAZ</span>
-        <p className="footer-copy">Finanças da casa · Diogo & Camila</p>
+        <p>Feito com carinho pra nossa casa 🏡</p>
       </footer>
     </div>
   )

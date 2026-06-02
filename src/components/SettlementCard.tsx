@@ -59,7 +59,7 @@ export function SettlementCard({ expenses }: Props) {
           <span className="balanced-emoji" aria-hidden>
             ✨
           </span>
-          <p>Em dia.</p>
+          <p>Tudo certinho entre vocês dois!</p>
         </div>
       )}
     </section>

@@ -52,7 +52,9 @@ export function ExpenseTable({
   return (
     <section className="expense-table-section">
       <div className="table-header">
-        <h2>Planilha da casa</h2>
+        <h2>
+          <span aria-hidden>📋</span> Planilha da casa
+        </h2>
         <div className="filter-tabs" role="tablist">
           {(
             [
@@ -77,6 +79,7 @@ export function ExpenseTable({
 
       {filtered.length === 0 ? (
         <div className="empty-state">
+          <span aria-hidden>🏠</span>
           <p>
             {filter === 'all'
               ? 'Nenhum gasto ainda. Registrem o primeiro acima!'
@@ -213,7 +216,9 @@ function ExpenseRow({
               {personLabel(debt.to)}
             </p>
           )}
-          {expense.settled && <p className="row-paid-badge">Acerto feito</p>}
+          {expense.settled && (
+            <p className="row-paid-badge">✓ Acerto feito</p>
+          )}
         </div>
 
         <input

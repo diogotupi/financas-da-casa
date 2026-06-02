@@ -36,7 +36,9 @@ export function ExpenseForm({ onAdd, disabled }: Props) {
 
   return (
     <form className={`expense-form ${disabled ? 'is-disabled' : ''}`} onSubmit={handleSubmit}>
-      <h2 className="form-title">Registrar gasto</h2>
+      <h2 className="form-title">
+        <span aria-hidden>➕</span> Registrar gasto
+      </h2>
 
       <div className="form-row">
         <label className="field flex-grow">
@@ -82,6 +84,14 @@ export function ExpenseForm({ onAdd, disabled }: Props) {
                 type="button"
                 className={`payer-btn ${paidBy === person ? 'active' : ''}`}
                 onClick={() => setPaidBy(person)}
+                style={
+                  paidBy === person
+                    ? {
+                        borderColor: PEOPLE[person].color,
+                        background: `${PEOPLE[person].color}18`,
+                      }
+                    : undefined
+                }
               >
                 <span
                   className="avatar small"

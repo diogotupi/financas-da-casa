@@ -36,7 +36,7 @@ export function SyncStatus({ loading, synced, error }: Props) {
     return (
       <div className="sync-banner sync-ok" role="status">
         <span className="sync-dot live" aria-hidden />
-        <span>Sincronizado — vocês dois veem a mesma planilha ao vivo</span>
+        <span>Sincronizado em tempo real — Diogo e Camila veem a mesma planilha</span>
       </div>
     )
   }
