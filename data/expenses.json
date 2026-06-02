@@ -29,7 +29,7 @@
     "amount": 120,
     "paidBy": "camila",
     "date": "2026-06-02",
-    "settled": false
+    "settled": true
   },
   {
     "id": "1995152b-60ee-40bd-a590-c1d52aa61494",
