@@ -13,7 +13,7 @@
     "amount": 220,
     "paidBy": "diogo",
     "date": "2026-06-02",
-    "settled": false
+    "settled": true
   },
   {
     "id": "c64cf4eb-b43c-48c8-b77c-e41060632ae9",
