@@ -10,6 +10,6 @@ export interface Expense {
 }
 
 export const PEOPLE = {
-  diogo: { name: 'Diogo', initial: 'D', color: '#c45c4a' },
-  camila: { name: 'Camila', initial: 'C', color: '#5b8a72' },
+  diogo: { name: 'Diogo', initial: 'D', color: '#6b6b6b' },
+  camila: { name: 'Camila', initial: 'C', color: '#820006' },
 } as const
