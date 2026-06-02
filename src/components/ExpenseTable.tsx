@@ -13,11 +13,12 @@ type Filter = 'all' | 'pending' | 'settled'
 
 interface Props {
   expenses: Expense[]
-  onToggleSettled: (id: string) => void
-  onRemove: (id: string) => void
+  onToggleSettled: (id: string) => Promise<void>
+  onRemove: (id: string) => Promise<void>
+  disabled?: boolean
 }
 
-export function ExpenseTable({ expenses, onToggleSettled, onRemove }: Props) {
+export function ExpenseTable({ expenses, onToggleSettled, onRemove, disabled }: Props) {
   const [filter, setFilter] = useState<Filter>('all')
 
   const filtered = useMemo(() => {
@@ -85,6 +86,7 @@ export function ExpenseTable({ expenses, onToggleSettled, onRemove }: Props) {
               expense={expense}
               onToggleSettled={onToggleSettled}
               onRemove={onRemove}
+              disabled={disabled}
             />
           ))}
         </div>
@@ -97,10 +99,12 @@ function ExpenseRow({
   expense,
   onToggleSettled,
   onRemove,
+  disabled,
 }: {
   expense: Expense
-  onToggleSettled: (id: string) => void
-  onRemove: (id: string) => void
+  onToggleSettled: (id: string) => Promise<void>
+  onRemove: (id: string) => Promise<void>
+  disabled?: boolean
 }) {
   const debt = getDebtForExpense(expense)
   const share = halfShare(expense.amount)
@@ -141,11 +145,12 @@ function ExpenseRow({
       </div>
 
       <div className="row-actions">
-        <label className="pago-toggle">
+        <label className={`pago-toggle ${disabled ? 'is-disabled' : ''}`}>
           <input
             type="checkbox"
             checked={expense.settled}
-            onChange={() => onToggleSettled(expense.id)}
+            disabled={disabled}
+            onChange={() => void onToggleSettled(expense.id)}
           />
           <span className="pago-slider" />
           <span className="pago-label">PAGO</span>
@@ -154,7 +159,8 @@ function ExpenseRow({
         <button
           type="button"
           className="btn-ghost btn-delete"
-          onClick={() => onRemove(expense.id)}
+          disabled={disabled}
+          onClick={() => void onRemove(expense.id)}
           title="Remover"
           aria-label="Remover gasto"
         >

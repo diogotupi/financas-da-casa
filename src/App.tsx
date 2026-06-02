@@ -2,12 +2,15 @@ import type { CSSProperties } from 'react'
 import { ExpenseForm } from './components/ExpenseForm'
 import { ExpenseTable } from './components/ExpenseTable'
 import { SettlementCard } from './components/SettlementCard'
+import { SyncStatus } from './components/SyncStatus'
 import { useExpenses } from './hooks/useExpenses'
 import { PEOPLE } from './types'
 import './App.css'
 
 function App() {
-  const { expenses, addExpense, toggleSettled, removeExpense } = useExpenses()
+  const { expenses, loading, synced, error, addExpense, toggleSettled, removeExpense } =
+    useExpenses()
+  const disabled = loading || !!error
 
   return (
     <div className="app">
@@ -34,12 +37,14 @@ function App() {
       </header>
 
       <main>
+        <SyncStatus loading={loading} synced={synced} error={error} />
         <SettlementCard expenses={expenses} />
-        <ExpenseForm onAdd={addExpense} />
+        <ExpenseForm onAdd={addExpense} disabled={disabled} />
         <ExpenseTable
           expenses={expenses}
           onToggleSettled={toggleSettled}
           onRemove={removeExpense}
+          disabled={disabled}
         />
       </main>
 

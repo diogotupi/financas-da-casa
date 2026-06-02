@@ -8,27 +8,34 @@ interface Props {
     amount: number
     paidBy: Person
     date: string
-  }) => void
+  }) => Promise<void>
+  disabled?: boolean
 }
 
-export function ExpenseForm({ onAdd }: Props) {
+export function ExpenseForm({ onAdd, disabled }: Props) {
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [paidBy, setPaidBy] = useState<Person>('diogo')
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const [saving, setSaving] = useState(false)
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     const parsed = parseFloat(amount.replace(',', '.'))
-    if (!description.trim() || !parsed || parsed <= 0) return
+    if (!description.trim() || !parsed || parsed <= 0 || disabled || saving) return
 
-    onAdd({ description, amount: parsed, paidBy, date })
-    setDescription('')
-    setAmount('')
+    setSaving(true)
+    try {
+      await onAdd({ description, amount: parsed, paidBy, date })
+      setDescription('')
+      setAmount('')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
-    <form className="expense-form" onSubmit={handleSubmit}>
+    <form className={`expense-form ${disabled ? 'is-disabled' : ''}`} onSubmit={handleSubmit}>
       <h2 className="form-title">
         <span aria-hidden>➕</span> Registrar gasto
       </h2>
@@ -96,8 +103,8 @@ export function ExpenseForm({ onAdd }: Props) {
         </fieldset>
       </div>
 
-      <button type="submit" className="btn-primary">
-        Adicionar à planilha
+      <button type="submit" className="btn-primary" disabled={disabled || saving}>
+        {saving ? 'Salvando…' : 'Adicionar à planilha'}
       </button>
     </form>
   )
