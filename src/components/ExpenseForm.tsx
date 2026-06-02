@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from 'react'
-import type { Person } from '../types'
+import { Avatar } from './Avatar'
+import type { Person, Profiles } from '../types'
 import { PEOPLE } from '../types'
 
 interface Props {
@@ -9,10 +10,11 @@ interface Props {
     paidBy: Person
     date: string
   }) => Promise<void>
+  profiles: Profiles
   disabled?: boolean
 }
 
-export function ExpenseForm({ onAdd, disabled }: Props) {
+export function ExpenseForm({ onAdd, profiles, disabled }: Props) {
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [paidBy, setPaidBy] = useState<Person>('diogo')
@@ -93,12 +95,7 @@ export function ExpenseForm({ onAdd, disabled }: Props) {
                     : undefined
                 }
               >
-                <span
-                  className="avatar small"
-                  style={{ background: PEOPLE[person].color }}
-                >
-                  {PEOPLE[person].initial}
-                </span>
+                <Avatar person={person} photo={profiles[person]} size="small" />
                 {PEOPLE[person].name}
               </button>
             ))}

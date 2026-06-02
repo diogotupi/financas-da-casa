@@ -1,5 +1,7 @@
 export type Person = 'diogo' | 'camila'
 
+export type Profiles = Partial<Record<Person, string>>
+
 export interface Expense {
   id: string
   description: string

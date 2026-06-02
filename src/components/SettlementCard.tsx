@@ -1,12 +1,13 @@
 import { calculateSettlement, formatMoney, personLabel } from '../lib/settlement'
-import type { Expense } from '../types'
-import { PEOPLE } from '../types'
+import type { Expense, Profiles } from '../types'
+import { Avatar } from './Avatar'
 
 interface Props {
   expenses: Expense[]
+  profiles: Profiles
 }
 
-export function SettlementCard({ expenses }: Props) {
+export function SettlementCard({ expenses, profiles }: Props) {
   const pending = expenses.filter((e) => !e.settled)
   const settlement = calculateSettlement(expenses)
   const pendingTotal = pending.reduce((s, e) => s + e.amount, 0)
@@ -30,23 +31,21 @@ export function SettlementCard({ expenses }: Props) {
       {settlement ? (
         <div className="settlement-result">
           <div className="settlement-flow">
-            <div
-              className="avatar large"
-              style={{ background: PEOPLE[settlement.from].color }}
-            >
-              {PEOPLE[settlement.from].initial}
-            </div>
+            <Avatar
+              person={settlement.from}
+              photo={profiles[settlement.from]}
+              size="large"
+            />
             <div className="settlement-arrow">
               <span>deve</span>
               <strong>{formatMoney(settlement.amount)}</strong>
               <span className="arrow">→</span>
             </div>
-            <div
-              className="avatar large"
-              style={{ background: PEOPLE[settlement.to].color }}
-            >
-              {PEOPLE[settlement.to].initial}
-            </div>
+            <Avatar
+              person={settlement.to}
+              photo={profiles[settlement.to]}
+              size="large"
+            />
           </div>
           <p className="settlement-text">
             <strong>{personLabel(settlement.from)}</strong> deve{' '}

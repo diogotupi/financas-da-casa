@@ -6,7 +6,8 @@ import {
   halfShare,
   personLabel,
 } from '../lib/settlement'
-import type { Expense } from '../types'
+import { Avatar } from './Avatar'
+import type { Expense, Profiles } from '../types'
 import { PEOPLE } from '../types'
 
 type Filter = 'all' | 'pending' | 'settled'
@@ -19,6 +20,7 @@ interface Props {
     id: string,
     patch: { description?: string; amount?: number },
   ) => Promise<void>
+  profiles: Profiles
   disabled?: boolean
 }
 
@@ -27,6 +29,7 @@ export function ExpenseTable({
   onToggleSettled,
   onRemove,
   onUpdate,
+  profiles,
   disabled,
 }: Props) {
   const [filter, setFilter] = useState<Filter>('all')
@@ -97,6 +100,7 @@ export function ExpenseTable({
               onToggleSettled={onToggleSettled}
               onRemove={onRemove}
               onUpdate={onUpdate}
+              profiles={profiles}
               disabled={disabled}
             />
           ))}
@@ -116,6 +120,7 @@ function ExpenseRow({
   onToggleSettled,
   onRemove,
   onUpdate,
+  profiles,
   disabled,
 }: {
   expense: Expense
@@ -125,6 +130,7 @@ function ExpenseRow({
     id: string,
     patch: { description?: string; amount?: number },
   ) => Promise<void>
+  profiles: Profiles
   disabled?: boolean
 }) {
   const debt = getDebtForExpense(expense)
@@ -183,13 +189,11 @@ function ExpenseRow({
   return (
     <article className={`expense-row ${expense.settled ? 'settled' : ''}`}>
       <div className="row-main">
-        <div
-          className="avatar"
-          style={{ background: payer.color }}
+        <Avatar
+          person={expense.paidBy}
+          photo={profiles[expense.paidBy]}
           title={`Pago por ${payer.name}`}
-        >
-          {payer.initial}
-        </div>
+        />
 
         <div className="row-info">
           <div className="row-title-line">

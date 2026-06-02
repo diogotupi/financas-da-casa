@@ -46,10 +46,69 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-muted);
+}
+
+.profile-avatar-btn {
+  position: relative;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 50%;
+  line-height: 0;
+}
+
+.profile-avatar-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.profile-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(10, 10, 10, 0.45);
+  color: #fff;
+  font-size: 1.1rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.profile-avatar-btn:hover .profile-avatar-overlay,
+.profile-avatar-btn:focus-visible .profile-avatar-overlay {
+  opacity: 1;
+}
+
+.profile-file-input {
+  display: none;
+}
+
+.profile-upload-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.profile-upload-label:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.profile-upload-label:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Avatars */
@@ -64,6 +123,14 @@
   font-weight: 700;
   font-size: 0.85rem;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .avatar.small {

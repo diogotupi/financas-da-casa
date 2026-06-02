@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cors, githubGetJson, githubPutJson } from './lib/github.js'
 
-const PATH = 'data/expenses.json'
+const PATH = 'data/profiles.json'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   cors(res)
@@ -13,15 +13,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     if (req.method === 'GET') {
       const data = await githubGetJson(PATH)
-      return res.status(200).json(Array.isArray(data) ? data : [])
+      return res.status(200).json(data ?? {})
     }
 
     if (req.method === 'PUT') {
       const body = req.body
-      if (!Array.isArray(body)) {
-        return res.status(400).json({ error: 'Body deve ser um array de gastos' })
+      if (!body || typeof body !== 'object' || Array.isArray(body)) {
+        return res.status(400).json({ error: 'Body deve ser um objeto de perfis' })
       }
-      await githubPutJson(PATH, body, 'sync: planilha da casa')
+      await githubPutJson(PATH, body, 'sync: fotos de perfil')
       return res.status(200).json({ ok: true })
     }
 
