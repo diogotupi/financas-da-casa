@@ -1,5 +1,13 @@
 [
   {
+    "id": "c64cf4eb-b43c-48c8-b77c-e41060632ae9",
+    "description": "Parcela Máquina de Lavar 1/3",
+    "amount": 220,
+    "paidBy": "camila",
+    "date": "2026-06-02",
+    "settled": false
+  },
+  {
     "id": "828ea6d9-7904-4198-afce-f004bfb95dc0",
     "description": "Varal de Teto",
     "amount": 120,
