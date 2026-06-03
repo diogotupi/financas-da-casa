@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { normalizeExpense } from '../lib/expenses'
 import { fetchExpenses, isSyncConfigured, saveExpenses } from '../lib/sync'
 import type { Expense, Person } from '../types'
 
@@ -51,12 +52,15 @@ export function useExpenses() {
         try {
           const raw = localStorage.getItem(LEGACY_STORAGE_KEY)
           if (raw) {
-            const legacy = JSON.parse(raw) as Expense[]
-            if (legacy.length > 0) {
+            const legacy = JSON.parse(raw) as unknown[]
+            const migrated = legacy
+              .map(normalizeExpense)
+              .filter((e): e is Expense => e !== null)
+            if (migrated.length > 0) {
               savingRef.current = true
-              await saveExpenses(legacy)
+              await saveExpenses(migrated)
               localStorage.removeItem(LEGACY_STORAGE_KEY)
-              setExpenses(legacy)
+              setExpenses(migrated)
             }
           }
         } catch {
@@ -76,21 +80,24 @@ export function useExpenses() {
     }
   }, [pull])
 
-  const persist = useCallback(async (next: Expense[]) => {
-    savingRef.current = true
-    setExpenses(next)
-    try {
-      await saveExpenses(next)
-      setSynced(true)
-      setError(null)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao salvar')
-      await pull()
-      throw err
-    } finally {
-      savingRef.current = false
-    }
-  }, [pull])
+  const persist = useCallback(
+    async (next: Expense[]) => {
+      savingRef.current = true
+      setExpenses(next)
+      try {
+        await saveExpenses(next)
+        setSynced(true)
+        setError(null)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erro ao salvar')
+        await pull()
+        throw err
+      } finally {
+        savingRef.current = false
+      }
+    },
+    [pull],
+  )
 
   const addExpense = useCallback(
     async (data: {
@@ -105,19 +112,8 @@ export function useExpenses() {
         amount: data.amount,
         paidBy: data.paidBy,
         date: data.date,
-        settled: false,
       }
       await persist([expense, ...expensesRef.current])
-    },
-    [persist],
-  )
-
-  const toggleSettled = useCallback(
-    async (id: string) => {
-      const next = expensesRef.current.map((e) =>
-        e.id === id ? { ...e, settled: !e.settled } : e,
-      )
-      await persist(next)
     },
     [persist],
   )
@@ -131,27 +127,16 @@ export function useExpenses() {
   )
 
   const updateExpense = useCallback(
-    async (
-      id: string,
-      patch: { description?: string; amount?: number },
-    ) => {
+    async (id: string, patch: { description?: string; amount?: number }) => {
       const current = expensesRef.current.find((e) => e.id === id)
       if (!current) return
 
       const description =
-        patch.description !== undefined
-          ? patch.description.trim()
-          : current.description
+        patch.description !== undefined ? patch.description.trim() : current.description
       const amount = patch.amount !== undefined ? patch.amount : current.amount
 
       if (!description || amount <= 0) return
-
-      if (
-        description === current.description &&
-        amount === current.amount
-      ) {
-        return
-      }
+      if (description === current.description && amount === current.amount) return
 
       const next = expensesRef.current.map((e) =>
         e.id === id ? { ...e, description, amount } : e,
@@ -167,7 +152,6 @@ export function useExpenses() {
     synced,
     error,
     addExpense,
-    toggleSettled,
     removeExpense,
     updateExpense,
   }

@@ -1,7 +1,8 @@
-import { type FormEvent, useState } from 'react'
-import { Avatar } from './Avatar'
-import type { Person, Profiles } from '../types'
+import { type FormEvent, useEffect, useState } from 'react'
+import { defaultDateForMonth } from '../lib/expenses'
+import type { MonthKey, Person, Profiles } from '../types'
 import { PEOPLE } from '../types'
+import { Avatar } from './Avatar'
 
 interface Props {
   onAdd: (data: {
@@ -11,15 +12,20 @@ interface Props {
     date: string
   }) => Promise<void>
   profiles: Profiles
+  monthKey: MonthKey
   disabled?: boolean
 }
 
-export function ExpenseForm({ onAdd, profiles, disabled }: Props) {
+export function ExpenseForm({ onAdd, profiles, monthKey, disabled }: Props) {
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [paidBy, setPaidBy] = useState<Person>('diogo')
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const [date, setDate] = useState(() => defaultDateForMonth(monthKey))
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    setDate(defaultDateForMonth(monthKey))
+  }, [monthKey])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -104,7 +110,7 @@ export function ExpenseForm({ onAdd, profiles, disabled }: Props) {
       </div>
 
       <button type="submit" className="btn-primary" disabled={disabled || saving}>
-        {saving ? 'Salvando…' : 'Adicionar à planilha'}
+        {saving ? 'Salvando…' : 'Adicionar'}
       </button>
     </form>
   )

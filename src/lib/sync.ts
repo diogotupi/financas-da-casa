@@ -1,3 +1,4 @@
+import { normalizeExpense } from './expenses'
 import type { Expense, Profiles } from '../types'
 
 const API_BASE =
@@ -13,7 +14,8 @@ export async function fetchExpenses(): Promise<Expense[]> {
   const res = await fetch(EXPENSES_API, { cache: 'no-store' })
   if (!res.ok) throw new Error('Não foi possível carregar a planilha')
   const data = await res.json()
-  return Array.isArray(data) ? (data as Expense[]) : []
+  if (!Array.isArray(data)) return []
+  return data.map(normalizeExpense).filter((e): e is Expense => e !== null)
 }
 
 export async function saveExpenses(expenses: Expense[]): Promise<void> {

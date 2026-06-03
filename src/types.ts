@@ -2,13 +2,15 @@ export type Person = 'diogo' | 'camila'
 
 export type Profiles = Partial<Record<Person, string>>
 
+/** Chave do mês: YYYY-MM */
+export type MonthKey = string
+
 export interface Expense {
   id: string
   description: string
   amount: number
   paidBy: Person
   date: string
-  settled: boolean
 }
 
 export const PEOPLE = {
