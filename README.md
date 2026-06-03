@@ -1,6 +1,6 @@
 # Finanças da Casa
 
-Sistema para dividir custos de casa entre Diogo e Camila (50/50), com **planilha sincronizada em tempo real**.
+Sistema para registrar e acompanhar os gastos de casa de Diogo e Camila, **mês a mês**, com planilha sincronizada em tempo real.
 
 ## Links
 
@@ -25,4 +25,4 @@ npm run dev
 
 ## Exemplo
 
-Diogo paga R$ 500 de mercado → Camila deve R$ 250 para Diogo. Quando acertarem, marque **PAGO** naquele item.
+Em maio, Diogo registra mercado R$ 500 e Camila registra luz R$ 120. O site mostra o total de cada um naquele mês, lado a lado.
