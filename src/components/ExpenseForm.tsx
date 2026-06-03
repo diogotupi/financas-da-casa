@@ -135,8 +135,7 @@ export function ExpenseForm({ onAdd, profiles, monthKey, currentUser, disabled }
             required
           />
           <p className="field-hint">
-            1x: entra só no mês da compra. 2 ou mais: divide o total nos meses seguintes (ex.: 3x de R$
-            100 em jun, jul e ago).
+            Parcelas serão divididas e mostradas nos meses subsequentes.
           </p>
         </label>
       )}

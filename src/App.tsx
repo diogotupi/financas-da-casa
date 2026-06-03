@@ -42,7 +42,7 @@ function App() {
         </div>
         <h1>Finanças da Casa</h1>
         <p className="hero-sub">
-          Olá, {PEOPLE[currentUser].name} — gastos mês a mês (você vê tudo, edita só os seus)
+          Olá, {PEOPLE[currentUser].name}. Seja bem vindo ao controle financeiro da sua casa.
         </p>
         <div className="hero-avatars">
           {(['diogo', 'camila'] as const).map((person) => (

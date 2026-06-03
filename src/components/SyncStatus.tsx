@@ -48,7 +48,7 @@ export function SyncStatus({ loading, synced, syncState, error }: Props) {
     return (
       <div className="sync-banner sync-ok" role="status">
         <span className="sync-dot live" aria-hidden />
-        <span>Sincronizado — Diogo e Camila veem a mesma planilha (atualiza a cada ~30s)</span>
+        <span>Atualizado.</span>
       </div>
     )
   }
