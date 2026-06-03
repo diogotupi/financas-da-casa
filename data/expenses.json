@@ -1,5 +1,13 @@
 [
   {
+    "id": "3382713e-0016-4170-abdf-985e8f4637c6",
+    "description": "Mercado Mundial",
+    "amount": 100,
+    "paidBy": "camila",
+    "date": "2026-06-01",
+    "paymentMethod": "debito"
+  },
+  {
     "id": "a689e5a8-e41b-4715-a686-14d1cad52b1e",
     "description": "Casas Pedro",
     "amount": 35.06,
