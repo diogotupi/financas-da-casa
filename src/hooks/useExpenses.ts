@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { normalizeExpense } from '../lib/expenses'
+import { findExpense, normalizeExpense } from '../lib/expenses'
 import { fetchExpenses, isSyncConfigured, saveExpenses } from '../lib/sync'
-import type { Expense, Person } from '../types'
+import type { Expense, PaymentMethod, Person } from '../types'
 
 const LEGACY_STORAGE_KEY = 'financas-da-casa-expenses'
 const POLL_MS = 1200
@@ -105,6 +105,8 @@ export function useExpenses() {
       amount: number
       paidBy: Person
       date: string
+      paymentMethod: PaymentMethod
+      installments?: number
     }) => {
       const expense: Expense = {
         id: crypto.randomUUID(),
@@ -112,6 +114,10 @@ export function useExpenses() {
         amount: data.amount,
         paidBy: data.paidBy,
         date: data.date,
+        paymentMethod: data.paymentMethod,
+        ...(data.paymentMethod === 'credito' && data.installments
+          ? { installments: data.installments }
+          : {}),
       }
       await persist([expense, ...expensesRef.current])
     },
@@ -127,13 +133,27 @@ export function useExpenses() {
   )
 
   const updateExpense = useCallback(
-    async (id: string, patch: { description?: string; amount?: number }) => {
-      const current = expensesRef.current.find((e) => e.id === id)
+    async (
+      id: string,
+      patch: { description?: string; amount?: number },
+      options?: { fromInstallmentSlice?: boolean },
+    ) => {
+      const current = findExpense(expensesRef.current, id)
       if (!current) return
 
-      const description =
+      let description =
         patch.description !== undefined ? patch.description.trim() : current.description
-      const amount = patch.amount !== undefined ? patch.amount : current.amount
+      let amount = patch.amount !== undefined ? patch.amount : current.amount
+
+      if (options?.fromInstallmentSlice && current.paymentMethod === 'credito') {
+        const n = current.installments ?? 1
+        if (n >= 2 && patch.amount !== undefined) {
+          amount = Math.round(patch.amount * n * 100) / 100
+        }
+        if (patch.description !== undefined) {
+          description = patch.description.replace(/\s+\d+\/\d+$/, '').trim() || description
+        }
+      }
 
       if (!description || amount <= 0) return
       if (description === current.description && amount === current.amount) return

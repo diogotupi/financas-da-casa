@@ -1,18 +1,23 @@
 import { useEffect, useState, type KeyboardEvent } from 'react'
 import {
-  filterByMonthAndPerson,
   formatDate,
   formatMonthLabel,
+  getMonthlyEntriesForMonth,
+  type MonthlyEntry,
 } from '../lib/expenses'
 import type { Expense, MonthKey, Person } from '../types'
-import { PEOPLE } from '../types'
+import { PAYMENT_METHODS, PEOPLE } from '../types'
 
 interface Props {
   person: Person
   expenses: Expense[]
   monthKey: MonthKey
   onRemove: (id: string) => Promise<void>
-  onUpdate: (id: string, patch: { description?: string; amount?: number }) => Promise<void>
+  onUpdate: (
+    id: string,
+    patch: { description?: string; amount?: number },
+    options?: { fromInstallmentSlice?: boolean },
+  ) => Promise<void>
   disabled?: boolean
 }
 
@@ -24,7 +29,7 @@ export function PersonExpenseList({
   onUpdate,
   disabled,
 }: Props) {
-  const list = filterByMonthAndPerson(expenses, monthKey, person)
+  const list = getMonthlyEntriesForMonth(expenses, monthKey, person)
   const monthLabel = formatMonthLabel(monthKey, false)
 
   return (
@@ -42,10 +47,10 @@ export function PersonExpenseList({
         <p className="person-month-empty">Nenhum gasto neste mês.</p>
       ) : (
         <ul className="person-month-list">
-          {list.map((expense) => (
+          {list.map((entry) => (
             <ExpenseRow
-              key={expense.id}
-              expense={expense}
+              key={`${entry.expenseId}-${entry.installment?.current ?? 'full'}`}
+              entry={entry}
               onRemove={onRemove}
               onUpdate={onUpdate}
               disabled={disabled}
@@ -63,59 +68,68 @@ function parseAmount(raw: string) {
 }
 
 function ExpenseRow({
-  expense,
+  entry,
   onRemove,
   onUpdate,
   disabled,
 }: {
-  expense: Expense
+  entry: MonthlyEntry
   onRemove: (id: string) => Promise<void>
-  onUpdate: (id: string, patch: { description?: string; amount?: number }) => Promise<void>
+  onUpdate: (
+    id: string,
+    patch: { description?: string; amount?: number },
+    options?: { fromInstallmentSlice?: boolean },
+  ) => Promise<void>
   disabled?: boolean
 }) {
-  const [description, setDescription] = useState(expense.description)
-  const [amount, setAmount] = useState(formatAmountInput(expense.amount))
+  const [label, setLabel] = useState(entry.label)
+  const [amount, setAmount] = useState(formatAmountInput(entry.amount))
   const [editing, setEditing] = useState(false)
+  const isSlice = Boolean(entry.installment)
 
   useEffect(() => {
     if (!editing) {
-      setDescription(expense.description)
-      setAmount(formatAmountInput(expense.amount))
+      setLabel(entry.label)
+      setAmount(formatAmountInput(entry.amount))
     }
-  }, [expense.description, expense.amount, editing])
+  }, [entry.label, entry.amount, editing])
 
   async function commitEdits() {
-    const nextDescription = description.trim()
+    const nextLabel = label.trim()
     const nextAmount = parseAmount(amount)
-    if (!nextDescription || !nextAmount || nextAmount <= 0) {
-      setDescription(expense.description)
-      setAmount(formatAmountInput(expense.amount))
+    if (!nextLabel || !nextAmount || nextAmount <= 0) {
+      setLabel(entry.label)
+      setAmount(formatAmountInput(entry.amount))
       return
     }
-    await onUpdate(expense.id, { description: nextDescription, amount: nextAmount })
+    await onUpdate(
+      entry.expenseId,
+      { description: nextLabel, amount: nextAmount },
+      { fromInstallmentSlice: isSlice },
+    )
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') e.currentTarget.blur()
     if (e.key === 'Escape') {
-      setDescription(expense.description)
-      setAmount(formatAmountInput(expense.amount))
+      setLabel(entry.label)
+      setAmount(formatAmountInput(entry.amount))
       setEditing(false)
       e.currentTarget.blur()
     }
   }
 
   return (
-    <li className="person-expense-row">
+    <li className={`person-expense-row ${isSlice ? 'is-installment' : ''}`}>
       <div className="person-expense-main">
         <div className="person-expense-fields">
           <input
             type="text"
             className="row-edit row-edit-title"
-            value={description}
+            value={label}
             disabled={disabled}
             aria-label="Descrição"
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => setLabel(e.target.value)}
             onFocus={() => setEditing(true)}
             onBlur={() => {
               setEditing(false)
@@ -123,7 +137,14 @@ function ExpenseRow({
             }}
             onKeyDown={handleKeyDown}
           />
-          <span className="row-date">{formatDate(expense.date)}</span>
+          <div className="row-meta-line">
+            <span className={`payment-badge payment-badge--${entry.paymentMethod}`}>
+              {PAYMENT_METHODS[entry.paymentMethod].label}
+            </span>
+            <span className="row-date">
+              {isSlice ? `Compra em ${formatDate(entry.purchaseDate)}` : formatDate(entry.purchaseDate)}
+            </span>
+          </div>
         </div>
         <input
           type="text"
@@ -131,7 +152,7 @@ function ExpenseRow({
           className="row-edit row-edit-amount"
           value={amount}
           disabled={disabled}
-          aria-label="Valor"
+          aria-label={isSlice ? 'Valor da parcela' : 'Valor'}
           onChange={(e) => setAmount(e.target.value)}
           onFocus={() => setEditing(true)}
           onBlur={() => {
@@ -145,7 +166,7 @@ function ExpenseRow({
         type="button"
         className="btn-ghost btn-delete"
         disabled={disabled}
-        onClick={() => void onRemove(expense.id)}
+        onClick={() => void onRemove(entry.expenseId)}
       >
         Remover
       </button>

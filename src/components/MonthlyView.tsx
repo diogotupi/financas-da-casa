@@ -9,7 +9,11 @@ interface Props {
   onMonthChange: (monthKey: MonthKey) => void
   profiles: Profiles
   onRemove: (id: string) => Promise<void>
-  onUpdate: (id: string, patch: { description?: string; amount?: number }) => Promise<void>
+  onUpdate: (
+    id: string,
+    patch: { description?: string; amount?: number },
+    options?: { fromInstallmentSlice?: boolean },
+  ) => Promise<void>
   disabled?: boolean
 }
 

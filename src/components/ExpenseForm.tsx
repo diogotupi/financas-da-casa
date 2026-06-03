@@ -1,7 +1,7 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { defaultDateForMonth } from '../lib/expenses'
-import type { MonthKey, Person, Profiles } from '../types'
-import { PEOPLE } from '../types'
+import type { MonthKey, PaymentMethod, Person, Profiles } from '../types'
+import { PAYMENT_METHODS, PEOPLE } from '../types'
 import { Avatar } from './Avatar'
 
 interface Props {
@@ -10,6 +10,8 @@ interface Props {
     amount: number
     paidBy: Person
     date: string
+    paymentMethod: PaymentMethod
+    installments?: number
   }) => Promise<void>
   profiles: Profiles
   monthKey: MonthKey
@@ -21,6 +23,8 @@ export function ExpenseForm({ onAdd, profiles, monthKey, disabled }: Props) {
   const [amount, setAmount] = useState('')
   const [paidBy, setPaidBy] = useState<Person>('diogo')
   const [date, setDate] = useState(() => defaultDateForMonth(monthKey))
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix')
+  const [installments, setInstallments] = useState('3')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -32,9 +36,19 @@ export function ExpenseForm({ onAdd, profiles, monthKey, disabled }: Props) {
     const parsed = parseFloat(amount.replace(',', '.'))
     if (!description.trim() || !parsed || parsed <= 0 || disabled || saving) return
 
+    const parcelas =
+      paymentMethod === 'credito' ? Math.max(2, parseInt(installments, 10) || 2) : undefined
+
     setSaving(true)
     try {
-      await onAdd({ description, amount: parsed, paidBy, date })
+      await onAdd({
+        description,
+        amount: parsed,
+        paidBy,
+        date,
+        paymentMethod,
+        installments: parcelas,
+      })
       setDescription('')
       setAmount('')
     } finally {
@@ -53,14 +67,14 @@ export function ExpenseForm({ onAdd, profiles, monthKey, disabled }: Props) {
           <span>O que foi?</span>
           <input
             type="text"
-            placeholder="Mercado, luz, internet..."
+            placeholder="Mercado, luz, ração..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
           />
         </label>
         <label className="field field-amount">
-          <span>Valor (R$)</span>
+          <span>Valor total (R$)</span>
           <input
             type="text"
             inputMode="decimal"
@@ -74,7 +88,7 @@ export function ExpenseForm({ onAdd, profiles, monthKey, disabled }: Props) {
 
       <div className="form-row">
         <label className="field">
-          <span>Data</span>
+          <span>Data da compra</span>
           <input
             type="date"
             value={date}
@@ -108,6 +122,39 @@ export function ExpenseForm({ onAdd, profiles, monthKey, disabled }: Props) {
           </div>
         </fieldset>
       </div>
+
+      <fieldset className="field payment-field">
+        <legend>Forma de pagamento</legend>
+        <div className="payment-toggle">
+          {(['pix', 'debito', 'credito'] as const).map((method) => (
+            <button
+              key={method}
+              type="button"
+              className={`payment-btn ${paymentMethod === method ? 'active' : ''}`}
+              onClick={() => setPaymentMethod(method)}
+            >
+              {PAYMENT_METHODS[method].label}
+            </button>
+          ))}
+        </div>
+      </fieldset>
+
+      {paymentMethod === 'credito' && (
+        <label className="field field-installments">
+          <span>Parcelas</span>
+          <input
+            type="number"
+            min={2}
+            max={48}
+            value={installments}
+            onChange={(e) => setInstallments(e.target.value)}
+            required
+          />
+          <p className="field-hint">
+            O valor total será dividido nos meses seguintes (ex.: 3x de R$ 100 em jun, jul e ago).
+          </p>
+        </label>
+      )}
 
       <button type="submit" className="btn-primary" disabled={disabled || saving}>
         {saving ? 'Salvando…' : 'Adicionar'}

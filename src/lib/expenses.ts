@@ -1,5 +1,15 @@
-import type { Expense, MonthKey, Person } from '../types'
+import type { Expense, MonthKey, PaymentMethod, Person } from '../types'
 import { PEOPLE } from '../types'
+
+export interface MonthlyEntry {
+  expenseId: string
+  label: string
+  amount: number
+  paidBy: Person
+  purchaseDate: string
+  paymentMethod: PaymentMethod
+  installment?: { current: number; total: number }
+}
 
 export function formatMoney(value: number) {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -53,38 +63,109 @@ export function defaultDateForMonth(monthKey: MonthKey): string {
   return `${monthKey}-01`
 }
 
-export function filterByMonth(expenses: Expense[], monthKey: MonthKey): Expense[] {
-  return expenses.filter((e) => getMonthKey(e.date) === monthKey)
+function roundMoney(value: number) {
+  return Math.round(value * 100) / 100
 }
 
-export function filterByMonthAndPerson(
+function installmentAmounts(total: number, count: number): number[] {
+  const base = roundMoney(total / count)
+  const amounts = Array.from({ length: count }, () => base)
+  const sum = roundMoney(base * (count - 1))
+  amounts[count - 1] = roundMoney(total - sum)
+  return amounts
+}
+
+/** Expande gasto em entradas mensais (crédito parcelado em meses seguintes) */
+export function expandExpenseEntries(
+  expense: Expense,
+): { monthKey: MonthKey; entry: MonthlyEntry }[] {
+  const method = expense.paymentMethod ?? 'pix'
+  const installments = expense.installments ?? 1
+
+  if (method !== 'credito' || installments < 2) {
+    return [
+      {
+        monthKey: getMonthKey(expense.date),
+        entry: {
+          expenseId: expense.id,
+          label: expense.description,
+          amount: expense.amount,
+          paidBy: expense.paidBy,
+          purchaseDate: expense.date,
+          paymentMethod: method === 'credito' ? 'credito' : method,
+        },
+      },
+    ]
+  }
+
+  const amounts = installmentAmounts(expense.amount, installments)
+  const startMonth = getMonthKey(expense.date)
+
+  return amounts.map((amount, i) => ({
+    monthKey: shiftMonth(startMonth, i),
+    entry: {
+      expenseId: expense.id,
+      label: `${expense.description} ${i + 1}/${installments}`,
+      amount,
+      paidBy: expense.paidBy,
+      purchaseDate: expense.date,
+      paymentMethod: 'credito',
+      installment: { current: i + 1, total: installments },
+    },
+  }))
+}
+
+export function getMonthlyEntriesForMonth(
   expenses: Expense[],
   monthKey: MonthKey,
   person: Person,
-): Expense[] {
-  return filterByMonth(expenses, monthKey)
-    .filter((e) => e.paidBy === person)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-}
+): MonthlyEntry[] {
+  const entries: MonthlyEntry[] = []
 
-export function sumExpenses(list: Expense[]): number {
-  return list.reduce((s, e) => s + e.amount, 0)
+  for (const expense of expenses) {
+    if (expense.paidBy !== person) continue
+    for (const { monthKey: mk, entry } of expandExpenseEntries(expense)) {
+      if (mk === monthKey) entries.push(entry)
+    }
+  }
+
+  return entries.sort(
+    (a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime(),
+  )
 }
 
 export function totalsForMonth(expenses: Expense[], monthKey: MonthKey) {
-  const month = filterByMonth(expenses, monthKey)
+  let diogo = 0
+  let camila = 0
+
+  for (const expense of expenses) {
+    for (const { monthKey: mk, entry } of expandExpenseEntries(expense)) {
+      if (mk !== monthKey) continue
+      if (entry.paidBy === 'diogo') diogo += entry.amount
+      else camila += entry.amount
+    }
+  }
+
   return {
-    diogo: sumExpenses(month.filter((e) => e.paidBy === 'diogo')),
-    camila: sumExpenses(month.filter((e) => e.paidBy === 'camila')),
-    all: sumExpenses(month),
+    diogo: roundMoney(diogo),
+    camila: roundMoney(camila),
+    all: roundMoney(diogo + camila),
   }
 }
 
 export function getAvailableMonths(expenses: Expense[]): MonthKey[] {
   const set = new Set<MonthKey>()
-  for (const e of expenses) set.add(getMonthKey(e.date))
+  for (const expense of expenses) {
+    for (const { monthKey } of expandExpenseEntries(expense)) {
+      set.add(monthKey)
+    }
+  }
   set.add(currentMonthKey())
   return [...set].sort((a, b) => b.localeCompare(a))
+}
+
+export function findExpense(expenses: Expense[], id: string) {
+  return expenses.find((e) => e.id === id)
 }
 
 export function normalizeExpense(raw: unknown): Expense | null {
@@ -99,11 +180,26 @@ export function normalizeExpense(raw: unknown): Expense | null {
   ) {
     return null
   }
+
+  const paymentMethod =
+    e.paymentMethod === 'pix' ||
+    e.paymentMethod === 'debito' ||
+    e.paymentMethod === 'credito'
+      ? e.paymentMethod
+      : 'pix'
+
+  let installments: number | undefined
+  if (typeof e.installments === 'number' && e.installments >= 2) {
+    installments = Math.floor(e.installments)
+  }
+
   return {
     id: e.id,
     description: e.description,
     amount: e.amount,
     paidBy: e.paidBy,
     date: e.date,
+    paymentMethod,
+    ...(paymentMethod === 'credito' && installments ? { installments } : {}),
   }
 }

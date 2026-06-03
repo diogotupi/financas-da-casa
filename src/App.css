@@ -251,6 +251,105 @@
   color: var(--text);
 }
 
+.payment-field {
+  width: 100%;
+  border: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.payment-field legend {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.35rem;
+}
+
+.payment-toggle {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.payment-btn {
+  flex: 1;
+  min-width: 5rem;
+  padding: 0.6rem 0.75rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.payment-btn:hover {
+  border-color: var(--text-muted);
+}
+
+.payment-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.field-installments {
+  margin-bottom: 1rem;
+}
+
+.field-installments input {
+  max-width: 6rem;
+}
+
+.field-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+  line-height: 1.4;
+}
+
+.row-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.payment-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background: var(--border);
+  color: var(--text-muted);
+}
+
+.payment-badge--pix {
+  background: rgba(91, 138, 114, 0.2);
+  color: var(--green);
+}
+
+.payment-badge--debito {
+  background: rgba(196, 92, 74, 0.12);
+  color: var(--accent);
+}
+
+.payment-badge--credito {
+  background: rgba(61, 56, 50, 0.08);
+  color: var(--text);
+}
+
+.person-expense-row.is-installment {
+  border-left: 3px solid var(--accent-soft);
+}
+
 .btn-primary {
   width: 100%;
   padding: 0.85rem 1.25rem;
