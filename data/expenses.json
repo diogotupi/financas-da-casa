@@ -1,5 +1,13 @@
 [
   {
+    "id": "a689e5a8-e41b-4715-a686-14d1cad52b1e",
+    "description": "Casas Pedro",
+    "amount": 35.06,
+    "paidBy": "camila",
+    "date": "2026-06-01",
+    "paymentMethod": "debito"
+  },
+  {
     "id": "a18d6cd1-5244-44d1-9b0a-31492da5e8a8",
     "description": "Conta de Luz",
     "amount": 477.56,
