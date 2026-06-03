@@ -1,12 +1,6 @@
 import { type FormEvent, useState } from 'react'
+import { isAuthenticated, setAuthenticated, verifyPassword } from '../lib/auth'
 import './PasswordGate.css'
-
-const AUTH_KEY = 'financas-da-casa-auth'
-const PASSWORD = 'abc123'
-
-function isAuthenticated() {
-  return sessionStorage.getItem(AUTH_KEY) === '1'
-}
 
 interface Props {
   children: React.ReactNode
@@ -19,8 +13,8 @@ export function PasswordGate({ children }: Props) {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (password === PASSWORD) {
-      sessionStorage.setItem(AUTH_KEY, '1')
+    if (verifyPassword(password)) {
+      setAuthenticated()
       setUnlocked(true)
       setError(false)
       return

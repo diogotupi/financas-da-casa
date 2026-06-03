@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { ChangePassword } from './components/ChangePassword'
 import { ExpenseForm } from './components/ExpenseForm'
 import { MonthlyView } from './components/MonthlyView'
 import { ProfileCard } from './components/ProfileCard'
@@ -58,6 +59,8 @@ function App() {
           disabled={disabled}
         />
       </main>
+
+      <ChangePassword />
 
       <footer className="footer">
         <p>Feito com carinho pra nossa casa 🏡</p>
