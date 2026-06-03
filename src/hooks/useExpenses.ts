@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { readExpensesCache, writeExpensesCache } from '../lib/expenseCache'
 import { findExpense, normalizeExpense } from '../lib/expenses'
-import { fetchExpenses, isSyncConfigured, saveExpenses } from '../lib/sync'
-import { SYNC_POLL_MS } from '../lib/syncConfig'
+import { isSyncConfigured, saveExpenses } from '../lib/sync'
+import { subscribeSyncPoll } from '../lib/syncPoll'
 import type { Expense, PaymentMethod, Person } from '../types'
 
 const LEGACY_STORAGE_KEY = 'financas-da-casa-expenses'
@@ -19,38 +19,32 @@ export function useExpenses() {
 
   expensesRef.current = expenses
 
-  const pull = useCallback(async () => {
-    if (!isSyncConfigured) return null
-    if (savingRef.current) return null
+  const applySyncFailure = useCallback((err: Error) => {
+    const cached = readExpensesCache()
+    const fallback = expensesRef.current.length > 0 ? expensesRef.current : cached
 
-    try {
-      const data = await fetchExpenses()
-      setExpenses(data)
-      writeExpensesCache(data)
-      setSyncState('ok')
-      setLoading(false)
-      setError(null)
-      return data
-    } catch (err) {
-      const cached = readExpensesCache()
-      const fallback =
-        expensesRef.current.length > 0 ? expensesRef.current : cached
-
-      if (fallback.length > 0) {
-        setExpenses(fallback)
-        setSyncState('stale')
-        setError(
-          'Não foi possível sincronizar agora. Mostrando a última cópia salva — os dados no GitHub estão seguros.',
-        )
-      } else {
-        setSyncState('error')
-        setError(
-          err instanceof Error ? err.message : 'Não foi possível carregar a planilha',
-        )
-      }
-      setLoading(false)
-      return null
+    if (fallback.length > 0) {
+      setExpenses(fallback)
+      setSyncState('stale')
+      setError(
+        err.message.includes('rate limit')
+          ? 'Limite da API do GitHub atingido. Mostrando a última cópia — tentamos de novo em alguns minutos.'
+          : 'Não foi possível sincronizar agora. Mostrando a última cópia salva — os dados no GitHub estão seguros.',
+      )
+    } else {
+      setSyncState('error')
+      setError(err.message)
     }
+    setLoading(false)
+  }, [])
+
+  const applySyncSuccess = useCallback((data: Expense[]) => {
+    setExpenses(data)
+    writeExpensesCache(data)
+    setSyncState('ok')
+    setLoading(false)
+    setError(null)
+    return data
   }, [])
 
   useEffect(() => {
@@ -61,46 +55,45 @@ export function useExpenses() {
       return
     }
 
-    let cancelled = false
+    let migrated = false
 
-    async function init() {
-      const data = await pull()
-      if (cancelled) return
+    return subscribeSyncPoll((result) => {
+      if (savingRef.current) return
 
-      if (data && data.length === 0) {
-        try {
-          const raw = localStorage.getItem(LEGACY_STORAGE_KEY)
-          if (raw) {
-            const legacy = JSON.parse(raw) as unknown[]
-            const migrated = legacy
-              .map(normalizeExpense)
-              .filter((e): e is Expense => e !== null)
-            if (migrated.length > 0) {
+      if (result.ok) {
+        const data = applySyncSuccess(result.data.expenses)
+
+        if (!migrated && data.length === 0) {
+          migrated = true
+          void (async () => {
+            try {
+              const raw = localStorage.getItem(LEGACY_STORAGE_KEY)
+              if (!raw) return
+              const legacy = JSON.parse(raw) as unknown[]
+              const list = legacy
+                .map(normalizeExpense)
+                .filter((e): e is Expense => e !== null)
+              if (list.length === 0) return
               savingRef.current = true
-              await saveExpenses(migrated)
-              writeExpensesCache(migrated)
+              await saveExpenses(list)
+              writeExpensesCache(list)
               localStorage.removeItem(LEGACY_STORAGE_KEY)
-              setExpenses(migrated)
+              setExpenses(list)
               setSyncState('ok')
               setError(null)
+            } catch {
+              // ignora migração
+            } finally {
+              savingRef.current = false
             }
-          }
-        } catch {
-          // ignora migração
-        } finally {
-          savingRef.current = false
+          })()
         }
+        return
       }
-    }
 
-    void init()
-    const id = setInterval(() => void pull(), SYNC_POLL_MS)
-
-    return () => {
-      cancelled = true
-      clearInterval(id)
-    }
-  }, [pull])
+      applySyncFailure(result.error)
+    })
+  }, [applySyncFailure, applySyncSuccess])
 
   const persist = useCallback(
     async (next: Expense[]) => {

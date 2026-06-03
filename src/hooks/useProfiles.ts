@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { fetchProfiles, isSyncConfigured, saveProfiles } from '../lib/sync'
-import { SYNC_POLL_MS } from '../lib/syncConfig'
+import { isSyncConfigured, saveProfiles } from '../lib/sync'
+import { subscribeSyncPoll } from '../lib/syncPoll'
 import type { Person, Profiles } from '../types'
 
 export function useProfiles() {
@@ -11,25 +11,14 @@ export function useProfiles() {
 
   profilesRef.current = profiles
 
-  const pull = useCallback(async () => {
-    if (!isSyncConfigured) return
-    if (savingRef.current) return
-
-    try {
-      const data = await fetchProfiles()
-      setProfiles(data)
-    } catch {
-      // mantém último estado conhecido
-    }
-  }, [])
-
   useEffect(() => {
     if (!isSyncConfigured) return
 
-    void pull()
-    const id = setInterval(() => void pull(), SYNC_POLL_MS)
-    return () => clearInterval(id)
-  }, [pull])
+    return subscribeSyncPoll((result) => {
+      if (savingRef.current) return
+      if (result.ok) setProfiles(result.data.profiles)
+    })
+  }, [])
 
   const uploadPhoto = useCallback(async (person: Person, dataUrl: string) => {
     setUploading(person)

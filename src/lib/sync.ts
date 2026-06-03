@@ -8,15 +8,51 @@ const API_BASE =
 export const EXPENSES_API = `${API_BASE}/api/expenses`
 export const PROFILES_API = `${API_BASE}/api/profiles`
 export const PASSWORD_API = `${API_BASE}/api/password`
+export const SYNC_API = `${API_BASE}/api/sync`
 
 export const isSyncConfigured = Boolean(EXPENSES_API)
 
-export async function fetchExpenses(): Promise<Expense[]> {
-  const res = await fetch(EXPENSES_API, { cache: 'no-store' })
-  if (!res.ok) throw new Error('Não foi possível carregar a planilha')
-  const data = await res.json()
+function parseExpensesList(data: unknown): Expense[] {
   if (!Array.isArray(data)) return []
   return data.map(normalizeExpense).filter((e): e is Expense => e !== null)
+}
+
+export function isRateLimitError(err: Error): boolean {
+  const msg = err.message.toLowerCase()
+  return msg.includes('rate limit') || msg.includes('limite')
+}
+
+async function readApiError(res: Response, fallback: string): Promise<Error> {
+  try {
+    const body = await res.json()
+    if (body && typeof body.error === 'string') {
+      return new Error(body.error)
+    }
+  } catch {
+    // ignore
+  }
+  return new Error(fallback)
+}
+
+/** Poll único: 1 HTTP do browser, 2 GET no GitHub */
+export async function fetchSyncBundle(): Promise<{ expenses: Expense[]; profiles: Profiles }> {
+  const res = await fetch(SYNC_API, { cache: 'no-store' })
+  if (!res.ok) {
+    throw await readApiError(res, 'Não foi possível carregar a planilha')
+  }
+  const data = await res.json()
+  const profiles =
+    data?.profiles && typeof data.profiles === 'object' && !Array.isArray(data.profiles)
+      ? (data.profiles as Profiles)
+      : {}
+  return { expenses: parseExpensesList(data?.expenses), profiles }
+}
+
+export async function fetchExpenses(): Promise<Expense[]> {
+  const res = await fetch(EXPENSES_API, { cache: 'no-store' })
+  if (!res.ok) throw await readApiError(res, 'Não foi possível carregar a planilha')
+  const data = await res.json()
+  return parseExpensesList(data)
 }
 
 export async function saveExpenses(expenses: Expense[]): Promise<void> {
@@ -25,7 +61,7 @@ export async function saveExpenses(expenses: Expense[]): Promise<void> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(expenses),
   })
-  if (!res.ok) throw new Error('Não foi possível salvar a planilha')
+  if (!res.ok) throw await readApiError(res, 'Não foi possível salvar a planilha')
 }
 
 export async function fetchProfiles(): Promise<Profiles> {
