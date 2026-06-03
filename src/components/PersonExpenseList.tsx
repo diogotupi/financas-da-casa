@@ -12,6 +12,7 @@ interface Props {
   person: Person
   expenses: Expense[]
   monthKey: MonthKey
+  canEdit: boolean
   onRemove: (id: string) => Promise<void>
   onUpdate: (
     id: string,
@@ -25,6 +26,7 @@ export function PersonExpenseList({
   person,
   expenses,
   monthKey,
+  canEdit,
   onRemove,
   onUpdate,
   disabled,
@@ -40,6 +42,7 @@ export function PersonExpenseList({
         </h3>
         <span className="person-month-count">
           {list.length} {list.length === 1 ? 'item' : 'itens'}
+          {!canEdit ? ' · só leitura' : ''}
         </span>
       </header>
 
@@ -51,6 +54,7 @@ export function PersonExpenseList({
             <ExpenseRow
               key={`${entry.expenseId}-${entry.installment?.current ?? 'full'}`}
               entry={entry}
+              canEdit={canEdit}
               onRemove={onRemove}
               onUpdate={onUpdate}
               disabled={disabled}
@@ -69,11 +73,13 @@ function parseAmount(raw: string) {
 
 function ExpenseRow({
   entry,
+  canEdit,
   onRemove,
   onUpdate,
   disabled,
 }: {
   entry: MonthlyEntry
+  canEdit: boolean
   onRemove: (id: string) => Promise<void>
   onUpdate: (
     id: string,
@@ -82,6 +88,7 @@ function ExpenseRow({
   ) => Promise<void>
   disabled?: boolean
 }) {
+  const readOnly = disabled || !canEdit
   const [label, setLabel] = useState(entry.label)
   const [amount, setAmount] = useState(formatAmountInput(entry.amount))
   const [editing, setEditing] = useState(false)
@@ -131,23 +138,28 @@ function ExpenseRow({
   }
 
   return (
-    <li className={`person-expense-row ${isSlice ? 'is-installment' : ''}`}>
+    <li
+      className={`person-expense-row ${isSlice ? 'is-installment' : ''} ${readOnly ? 'is-readonly' : ''}`}
+    >
       <div className="person-expense-main">
         <textarea
           className="row-edit row-edit-title"
           rows={1}
           value={label}
-          disabled={disabled}
+          disabled={readOnly}
           aria-label="Descrição"
+          readOnly={readOnly}
           onChange={(e) => {
             setLabel(e.target.value)
             resizeDescription(e.target)
           }}
           onFocus={(e) => {
+            if (readOnly) return
             setEditing(true)
             resizeDescription(e.currentTarget)
           }}
           onBlur={(e) => {
+            if (readOnly) return
             setEditing(false)
             resizeDescription(e.target)
             void commitEdits()
@@ -180,11 +192,15 @@ function ExpenseRow({
             inputMode="decimal"
             className="row-edit row-edit-amount"
             value={amount}
-            disabled={disabled}
+            disabled={readOnly}
+            readOnly={readOnly}
             aria-label={isSlice ? 'Valor da parcela' : 'Valor'}
             onChange={(e) => setAmount(e.target.value)}
-            onFocus={() => setEditing(true)}
+            onFocus={() => {
+              if (!readOnly) setEditing(true)
+            }}
             onBlur={() => {
+              if (readOnly) return
               setEditing(false)
               void commitEdits()
             }}
@@ -192,14 +208,15 @@ function ExpenseRow({
           />
         </div>
       </div>
-      <button
-        type="button"
-        className="btn-ghost btn-delete"
-        disabled={disabled}
-        onClick={() => void onRemove(entry.expenseId)}
-      >
-        Remover
-      </button>
+      {canEdit && !disabled && (
+        <button
+          type="button"
+          className="btn-ghost btn-delete"
+          onClick={() => void onRemove(entry.expenseId)}
+        >
+          Remover
+        </button>
+      )}
     </li>
   )
 }

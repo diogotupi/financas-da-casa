@@ -3,14 +3,18 @@ import { ChangePassword } from './components/ChangePassword'
 import { ExpenseForm } from './components/ExpenseForm'
 import { MonthlyView } from './components/MonthlyView'
 import { ProfileCard } from './components/ProfileCard'
+import { LogoutButton } from './components/PasswordGate'
 import { SyncStatus } from './components/SyncStatus'
+import { getCurrentUser } from './lib/auth'
 import { useExpenses } from './hooks/useExpenses'
 import { useProfiles } from './hooks/useProfiles'
 import { currentMonthKey, getAvailableMonths } from './lib/expenses'
+import { PEOPLE } from './types'
 import type { MonthKey } from './types'
 import './App.css'
 
 function App() {
+  const currentUser = getCurrentUser()!
   const {
     expenses,
     loading,
@@ -32,9 +36,14 @@ function App() {
   return (
     <div className="app">
       <header className="hero">
-        <div className="hero-badge">nosso cantinho</div>
+        <div className="hero-top">
+          <div className="hero-badge">nosso cantinho</div>
+          <LogoutButton />
+        </div>
         <h1>Finanças da Casa</h1>
-        <p className="hero-sub">Diogo & Camila — gastos mês a mês</p>
+        <p className="hero-sub">
+          Olá, {PEOPLE[currentUser].name} — gastos mês a mês (você vê tudo, edita só os seus)
+        </p>
         <div className="hero-avatars">
           {(['diogo', 'camila'] as const).map((person) => (
             <ProfileCard
@@ -43,6 +52,7 @@ function App() {
               photo={profiles[person]}
               uploading={uploading}
               disabled={disabled}
+              canEdit={currentUser === person}
               onUpload={uploadPhoto}
             />
           ))}
@@ -55,6 +65,7 @@ function App() {
           onAdd={addExpense}
           profiles={profiles}
           monthKey={activeMonth}
+          currentUser={currentUser}
           disabled={disabled}
         />
         <MonthlyView
@@ -62,13 +73,14 @@ function App() {
           monthKey={activeMonth}
           onMonthChange={setMonthKey}
           profiles={profiles}
+          currentUser={currentUser}
           onRemove={removeExpense}
           onUpdate={updateExpense}
           disabled={disabled}
         />
       </main>
 
-      <ChangePassword />
+      <ChangePassword currentUser={currentUser} />
 
       <footer className="footer">
         <p>Feito com carinho pra nossa casa 🏡</p>

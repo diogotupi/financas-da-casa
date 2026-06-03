@@ -1,4 +1,4 @@
-import type { Expense, MonthKey, Profiles } from '../types'
+import type { Expense, MonthKey, Person, Profiles } from '../types'
 import { MonthNavigator } from './MonthNavigator'
 import { MonthlyTotals } from './MonthlyTotals'
 import { PersonExpenseList } from './PersonExpenseList'
@@ -8,6 +8,7 @@ interface Props {
   monthKey: MonthKey
   onMonthChange: (monthKey: MonthKey) => void
   profiles: Profiles
+  currentUser: Person
   onRemove: (id: string) => Promise<void>
   onUpdate: (
     id: string,
@@ -22,6 +23,7 @@ export function MonthlyView({
   monthKey,
   onMonthChange,
   profiles,
+  currentUser,
   onRemove,
   onUpdate,
   disabled,
@@ -35,6 +37,7 @@ export function MonthlyView({
           person="diogo"
           expenses={expenses}
           monthKey={monthKey}
+          canEdit={currentUser === 'diogo'}
           onRemove={onRemove}
           onUpdate={onUpdate}
           disabled={disabled}
@@ -43,6 +46,7 @@ export function MonthlyView({
           person="camila"
           expenses={expenses}
           monthKey={monthKey}
+          canEdit={currentUser === 'camila'}
           onRemove={onRemove}
           onUpdate={onUpdate}
           disabled={disabled}

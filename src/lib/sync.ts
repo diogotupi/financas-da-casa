@@ -1,5 +1,6 @@
 import { normalizeExpense } from './expenses'
-import type { Expense, Profiles } from '../types'
+import type { Expense, Person, Profiles } from '../types'
+import type { Session } from './auth'
 
 const API_BASE =
   import.meta.env.VITE_SYNC_API?.replace(/\/api\/expenses$/, '') ||
@@ -7,7 +8,8 @@ const API_BASE =
 
 export const EXPENSES_API = `${API_BASE}/api/expenses`
 export const PROFILES_API = `${API_BASE}/api/profiles`
-export const PASSWORD_API = `${API_BASE}/api/password`
+export const LOGIN_API = `${API_BASE}/api/login`
+export const USER_PASSWORD_API = `${API_BASE}/api/user-password`
 export const SYNC_API = `${API_BASE}/api/sync`
 
 export const isSyncConfigured = Boolean(EXPENSES_API)
@@ -34,6 +36,38 @@ async function readApiError(res: Response, fallback: string): Promise<Error> {
   return new Error(fallback)
 }
 
+export async function loginUser(user: Person, password: string): Promise<void> {
+  const res = await fetch(LOGIN_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user, password }),
+  })
+  if (res.status === 403) {
+    throw new Error('Usuário ou senha incorretos.')
+  }
+  if (!res.ok) {
+    throw await readApiError(res, 'Não foi possível entrar')
+  }
+}
+
+export async function updateUserPassword(
+  user: Person,
+  currentPassword: string,
+  newPassword: string,
+): Promise<void> {
+  const res = await fetch(USER_PASSWORD_API, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user, currentPassword, newPassword }),
+  })
+  if (res.status === 403) {
+    throw new Error('Senha atual incorreta.')
+  }
+  if (!res.ok) {
+    throw await readApiError(res, 'Não foi possível salvar a senha')
+  }
+}
+
 /** Poll único: 1 HTTP do browser, 2 GET no GitHub */
 export async function fetchSyncBundle(): Promise<{ expenses: Expense[]; profiles: Profiles }> {
   const res = await fetch(SYNC_API, { cache: 'no-store' })
@@ -48,62 +82,38 @@ export async function fetchSyncBundle(): Promise<{ expenses: Expense[]; profiles
   return { expenses: parseExpensesList(data?.expenses), profiles }
 }
 
-export async function fetchExpenses(): Promise<Expense[]> {
-  const res = await fetch(EXPENSES_API, { cache: 'no-store' })
-  if (!res.ok) throw await readApiError(res, 'Não foi possível carregar a planilha')
-  const data = await res.json()
-  return parseExpensesList(data)
-}
-
-export async function saveExpenses(expenses: Expense[]): Promise<void> {
+export async function saveExpenses(expenses: Expense[], session: Session): Promise<void> {
   const res = await fetch(EXPENSES_API, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(expenses),
+    body: JSON.stringify({
+      user: session.user,
+      password: session.password,
+      expenses,
+    }),
   })
-  if (!res.ok) throw await readApiError(res, 'Não foi possível salvar a planilha')
+  if (res.status === 403) {
+    throw await readApiError(res, 'Sem permissão para alterar estes gastos')
+  }
+  if (!res.ok) {
+    throw await readApiError(res, 'Não foi possível salvar a planilha')
+  }
 }
 
-export async function fetchProfiles(): Promise<Profiles> {
-  const res = await fetch(PROFILES_API, { cache: 'no-store' })
-  if (!res.ok) throw new Error('Não foi possível carregar os perfis')
-  const data = await res.json()
-  return data && typeof data === 'object' && !Array.isArray(data)
-    ? (data as Profiles)
-    : {}
-}
-
-export async function saveProfiles(profiles: Profiles): Promise<void> {
+export async function saveProfiles(profiles: Profiles, session: Session): Promise<void> {
   const res = await fetch(PROFILES_API, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(profiles),
-  })
-  if (!res.ok) throw new Error('Não foi possível salvar a foto')
-}
-
-export async function fetchPassword(): Promise<string> {
-  const res = await fetch(PASSWORD_API, { cache: 'no-store' })
-  if (!res.ok) throw new Error('Não foi possível carregar a senha')
-  const data = await res.json()
-  if (data && typeof data.password === 'string' && data.password.length > 0) {
-    return data.password
-  }
-  throw new Error('Resposta de senha inválida')
-}
-
-export async function updatePassword(currentPassword: string, newPassword: string): Promise<void> {
-  const res = await fetch(PASSWORD_API, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ currentPassword, newPassword }),
+    body: JSON.stringify({
+      user: session.user,
+      password: session.password,
+      profiles,
+    }),
   })
   if (res.status === 403) {
-    throw new Error('Senha atual incorreta.')
+    throw await readApiError(res, 'Sem permissão para alterar este perfil')
   }
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    const msg = err && typeof err.error === 'string' ? err.error : 'Não foi possível salvar a senha'
-    throw new Error(msg)
+    throw await readApiError(res, 'Não foi possível salvar a foto')
   }
 }

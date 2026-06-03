@@ -9,6 +9,7 @@ interface Props {
   photo?: string
   uploading?: Person | null
   disabled?: boolean
+  canEdit?: boolean
   onUpload: (person: Person, dataUrl: string) => Promise<void>
 }
 
@@ -17,8 +18,10 @@ export function ProfileCard({
   photo,
   uploading,
   disabled,
+  canEdit = true,
   onUpload,
 }: Props) {
+  const locked = disabled || !canEdit
   const inputRef = useRef<HTMLInputElement>(null)
   const [cropImageUrl, setCropImageUrl] = useState<string | null>(null)
   const info = PEOPLE[person]
@@ -34,7 +37,7 @@ export function ProfileCard({
   }
 
   function handleFileSelect(file: File | undefined) {
-    if (!file || disabled || uploading) return
+    if (!file || locked || uploading) return
     if (!file.type.startsWith('image/')) return
 
     if (cropImageUrl) URL.revokeObjectURL(cropImageUrl)
@@ -57,9 +60,9 @@ export function ProfileCard({
         <button
           type="button"
           className="profile-avatar-btn"
-          disabled={disabled || !!uploading}
+          disabled={locked || !!uploading}
           onClick={openFilePicker}
-          aria-label={`Trocar foto de ${info.name}`}
+          aria-label={canEdit ? `Trocar foto de ${info.name}` : `Foto de ${info.name}`}
         >
           <Avatar person={person} photo={photo} size="large" />
           <span className="profile-avatar-overlay">
@@ -79,14 +82,16 @@ export function ProfileCard({
         />
 
         <span>{info.name}</span>
-        <button
-          type="button"
-          className="profile-upload-label"
-          disabled={disabled || !!uploading}
-          onClick={openFilePicker}
-        >
-          {uploading === person ? 'Enviando…' : photo ? 'Trocar foto' : 'Enviar foto'}
-        </button>
+        {canEdit && (
+          <button
+            type="button"
+            className="profile-upload-label"
+            disabled={locked || !!uploading}
+            onClick={openFilePicker}
+          >
+            {uploading === person ? 'Enviando…' : photo ? 'Trocar foto' : 'Enviar foto'}
+          </button>
+        )}
       </div>
 
       {cropImageUrl && (

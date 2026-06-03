@@ -1,10 +1,16 @@
 import { type FormEvent, useState } from 'react'
 import { changePassword } from '../lib/auth'
+import type { Person } from '../types'
+import { PEOPLE } from '../types'
 import './ChangePassword.css'
 
 type Feedback = { type: 'error' | 'success'; message: string } | null
 
-export function ChangePassword() {
+interface Props {
+  currentUser: Person
+}
+
+export function ChangePassword({ currentUser }: Props) {
   const [current, setCurrent] = useState('')
   const [next, setNext] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -46,7 +52,7 @@ export function ChangePassword() {
   return (
     <section className="change-password">
       <details>
-        <summary>Alterar senha</summary>
+        <summary>Alterar minha senha ({PEOPLE[currentUser].name})</summary>
         <form className="change-password-form" onSubmit={(e) => void handleSubmit(e)}>
           <label className="change-password-field">
             <span>Senha atual</span>

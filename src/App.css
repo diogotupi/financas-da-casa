@@ -10,6 +10,23 @@
   margin-bottom: 2rem;
 }
 
+.hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.hero-top .hero-badge {
+  margin-bottom: 0;
+}
+
+.btn-logout {
+  font-size: 0.85rem;
+}
+
 .hero-badge {
   display: inline-block;
   font-size: 0.75rem;
@@ -153,6 +170,15 @@
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
   margin-bottom: 1.5rem;
+}
+
+.form-payer-note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: -0.5rem 0 1rem;
 }
 
 .form-title {
@@ -349,6 +375,14 @@
 .payment-badge--credito {
   background: rgba(61, 56, 50, 0.08);
   color: var(--text);
+}
+
+.person-expense-row.is-readonly .row-edit {
+  cursor: default;
+}
+
+.person-expense-row.is-readonly .row-edit:hover:not(:disabled) {
+  background: transparent;
 }
 
 .person-expense-row.is-installment {

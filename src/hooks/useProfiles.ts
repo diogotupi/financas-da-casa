@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { getSession } from '../lib/auth'
 import { isSyncConfigured, saveProfiles } from '../lib/sync'
 import { subscribeSyncPoll } from '../lib/syncPoll'
 import type { Person, Profiles } from '../types'
@@ -21,12 +22,15 @@ export function useProfiles() {
   }, [])
 
   const uploadPhoto = useCallback(async (person: Person, dataUrl: string) => {
+    const session = getSession()
+    if (!session || session.user !== person) return
+
     setUploading(person)
     savingRef.current = true
     try {
       const next = { ...profilesRef.current, [person]: dataUrl }
       setProfiles(next)
-      await saveProfiles(next)
+      await saveProfiles(next, session)
     } finally {
       savingRef.current = false
       setUploading(null)

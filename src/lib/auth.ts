@@ -1,53 +1,79 @@
-import { fetchPassword, isSyncConfigured, updatePassword } from './sync'
+import { loginUser, updateUserPassword } from './sync'
+import type { Person } from '../types'
 
-const AUTH_KEY = 'financas-da-casa-auth'
-const PASSWORD_KEY = 'financas-da-casa-password'
-const DEFAULT_PASSWORD = 'abc123'
+const SESSION_KEY = 'financas-da-casa-session'
 
-let cachedPassword: string | null = null
-let initPromise: Promise<void> | null = null
+export type Session = { user: Person; password: string }
 
-function passwordFromStorage(): string {
-  return localStorage.getItem(PASSWORD_KEY) ?? DEFAULT_PASSWORD
+function readSession(): Session | null {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as Session
+    if (parsed?.user !== 'diogo' && parsed?.user !== 'camila') return null
+    if (typeof parsed.password !== 'string') return null
+    return parsed
+  } catch {
+    return null
+  }
 }
 
-function cachePassword(value: string) {
-  cachedPassword = value
-  localStorage.setItem(PASSWORD_KEY, value)
+function writeSession(session: Session) {
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(session))
 }
 
-export function getPassword(): string {
-  return cachedPassword ?? passwordFromStorage()
+export function clearSession() {
+  sessionStorage.removeItem(SESSION_KEY)
 }
 
-export function verifyPassword(input: string): boolean {
-  return input === getPassword()
+export function getSession(): Session | null {
+  return readSession()
 }
 
-/** Carrega a senha da API (compartilhada) ou do navegador como fallback */
-export function initAuth(): Promise<void> {
+export function getCurrentUser(): Person | null {
+  return readSession()?.user ?? null
+}
+
+export function isAuthenticated(): boolean {
+  return readSession() !== null
+}
+
+export async function login(user: Person, password: string): Promise<void> {
+  await loginUser(user, password)
+  writeSession({ user, password })
+}
+
+export async function logout(): Promise<void> {
+  clearSession()
+}
+
+let initPromise: Promise<boolean> | null = null
+
+/** Revalida sessão guardada com a API */
+export function initAuth(): Promise<boolean> {
   if (!initPromise) {
     initPromise = (async () => {
-      if (isSyncConfigured) {
-        try {
-          const remote = await fetchPassword()
-          cachePassword(remote)
-          return
-        } catch {
-          // usa cache local abaixo
-        }
+      const session = readSession()
+      if (!session) return false
+      try {
+        await loginUser(session.user, session.password)
+        return true
+      } catch {
+        clearSession()
+        return false
       }
-      cachedPassword = passwordFromStorage()
     })()
   }
   return initPromise
 }
 
 export async function changePassword(current: string, next: string): Promise<void> {
-  const trimmed = next.trim()
-  if (!verifyPassword(current)) {
-    throw new Error('Senha atual incorreta.')
+  const session = readSession()
+  if (!session) {
+    throw new Error('Faça login novamente.')
   }
+
+  const trimmed = next.trim()
   if (!trimmed) {
     throw new Error('Digite a nova senha.')
   }
@@ -55,22 +81,6 @@ export async function changePassword(current: string, next: string): Promise<voi
     throw new Error('A nova senha deve ser diferente da atual.')
   }
 
-  if (isSyncConfigured) {
-    await updatePassword(current, trimmed)
-  }
-
-  cachePassword(trimmed)
-
-  // Confirma que ficou gravado (API ou local)
-  if (getPassword() !== trimmed) {
-    throw new Error('Não foi possível salvar a senha. Tente de novo.')
-  }
-}
-
-export function isAuthenticated(): boolean {
-  return sessionStorage.getItem(AUTH_KEY) === '1'
-}
-
-export function setAuthenticated(): void {
-  sessionStorage.setItem(AUTH_KEY, '1')
+  await updateUserPassword(session.user, current, trimmed)
+  writeSession({ user: session.user, password: trimmed })
 }

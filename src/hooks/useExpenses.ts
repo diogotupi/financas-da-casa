@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { readExpensesCache, writeExpensesCache } from '../lib/expenseCache'
 import { findExpense, normalizeExpense } from '../lib/expenses'
+import { getSession } from '../lib/auth'
 import { isSyncConfigured, saveExpenses } from '../lib/sync'
 import { subscribeSyncPoll } from '../lib/syncPoll'
 import type { Expense, PaymentMethod, Person } from '../types'
@@ -74,8 +75,10 @@ export function useExpenses() {
                 .map(normalizeExpense)
                 .filter((e): e is Expense => e !== null)
               if (list.length === 0) return
+              const session = getSession()
+              if (!session) return
               savingRef.current = true
-              await saveExpenses(list)
+              await saveExpenses(list, session)
               writeExpensesCache(list)
               localStorage.removeItem(LEGACY_STORAGE_KEY)
               setExpenses(list)
@@ -95,13 +98,17 @@ export function useExpenses() {
     })
   }, [applySyncFailure, applySyncSuccess])
 
-  const persist = useCallback(
-    async (next: Expense[]) => {
-      savingRef.current = true
-      setExpenses(next)
-      writeExpensesCache(next)
-      try {
-        await saveExpenses(next)
+  const persist = useCallback(async (next: Expense[]) => {
+    const session = getSession()
+    if (!session) {
+      throw new Error('Faça login novamente.')
+    }
+
+    savingRef.current = true
+    setExpenses(next)
+    writeExpensesCache(next)
+    try {
+      await saveExpenses(next, session)
         setSyncState('ok')
         setError(null)
       } catch (err) {
@@ -115,9 +122,7 @@ export function useExpenses() {
       } finally {
         savingRef.current = false
       }
-    },
-    [],
-  )
+  }, [])
 
   const addExpense = useCallback(
     async (data: {
@@ -128,11 +133,14 @@ export function useExpenses() {
       paymentMethod: PaymentMethod
       installments?: number
     }) => {
+      const session = getSession()
+      if (!session) return
+
       const expense: Expense = {
         id: crypto.randomUUID(),
         description: data.description.trim(),
         amount: data.amount,
-        paidBy: data.paidBy,
+        paidBy: session.user,
         date: data.date,
         paymentMethod: data.paymentMethod,
         ...(data.paymentMethod === 'credito' &&
@@ -148,6 +156,10 @@ export function useExpenses() {
 
   const removeExpense = useCallback(
     async (id: string) => {
+      const session = getSession()
+      const target = findExpense(expensesRef.current, id)
+      if (!session || !target || target.paidBy !== session.user) return
+
       const next = expensesRef.current.filter((e) => e.id !== id)
       await persist(next)
     },
@@ -160,8 +172,9 @@ export function useExpenses() {
       patch: { description?: string; amount?: number },
       options?: { fromInstallmentSlice?: boolean },
     ) => {
+      const session = getSession()
       const current = findExpense(expensesRef.current, id)
-      if (!current) return
+      if (!session || !current || current.paidBy !== session.user) return
 
       let description =
         patch.description !== undefined ? patch.description.trim() : current.description

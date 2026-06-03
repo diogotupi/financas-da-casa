@@ -15,13 +15,13 @@ interface Props {
   }) => Promise<void>
   profiles: Profiles
   monthKey: MonthKey
+  currentUser: Person
   disabled?: boolean
 }
 
-export function ExpenseForm({ onAdd, profiles, monthKey, disabled }: Props) {
+export function ExpenseForm({ onAdd, profiles, monthKey, currentUser, disabled }: Props) {
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
-  const [paidBy, setPaidBy] = useState<Person>('diogo')
   const [date, setDate] = useState(() => defaultDateForMonth(monthKey))
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix')
   const [installments, setInstallments] = useState('3')
@@ -48,7 +48,7 @@ export function ExpenseForm({ onAdd, profiles, monthKey, disabled }: Props) {
       await onAdd({
         description,
         amount: parsed,
-        paidBy,
+        paidBy: currentUser,
         date,
         paymentMethod,
         installments: parcelas,
@@ -63,8 +63,13 @@ export function ExpenseForm({ onAdd, profiles, monthKey, disabled }: Props) {
   return (
     <form className={`expense-form ${disabled ? 'is-disabled' : ''}`} onSubmit={handleSubmit}>
       <h2 className="form-title">
-        <span aria-hidden>➕</span> Registrar gasto
+        <span aria-hidden>➕</span> Registrar gasto como {PEOPLE[currentUser].name}
       </h2>
+
+      <p className="form-payer-note">
+        <Avatar person={currentUser} photo={profiles[currentUser]} size="small" />
+        O gasto será registrado no seu nome ({PEOPLE[currentUser].name}).
+      </p>
 
       <div className="form-row">
         <label className="field flex-grow">
@@ -100,31 +105,6 @@ export function ExpenseForm({ onAdd, profiles, monthKey, disabled }: Props) {
             required
           />
         </label>
-
-        <fieldset className="field payer-field">
-          <legend>Quem pagou?</legend>
-          <div className="payer-toggle">
-            {(['diogo', 'camila'] as const).map((person) => (
-              <button
-                key={person}
-                type="button"
-                className={`payer-btn ${paidBy === person ? 'active' : ''}`}
-                onClick={() => setPaidBy(person)}
-                style={
-                  paidBy === person
-                    ? {
-                        borderColor: PEOPLE[person].color,
-                        background: `${PEOPLE[person].color}18`,
-                      }
-                    : undefined
-                }
-              >
-                <Avatar person={person} photo={profiles[person]} size="small" />
-                {PEOPLE[person].name}
-              </button>
-            ))}
-          </div>
-        </fieldset>
       </div>
 
       <fieldset className="field payment-field">
