@@ -86,5 +86,13 @@
     "paidBy": "diogo",
     "date": "2026-06-10",
     "paymentMethod": "debito"
+  },
+  {
+    "id": "edb05fd2-d14c-4e0c-a491-84d245da165c",
+    "description": "Instalação Máquina",
+    "amount": 220,
+    "paidBy": "diogo",
+    "date": "2026-05-05",
+    "paymentMethod": "debito"
   }
 ]
