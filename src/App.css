@@ -503,7 +503,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 .person-month-section {
@@ -513,12 +513,39 @@
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: min(28rem, 55vh);
 }
 
 .person-month-header {
-  margin-bottom: 1rem;
+  flex-shrink: 0;
+  margin-bottom: 0.75rem;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--border);
+}
+
+.person-month-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding-right: 0.15rem;
+  margin-right: -0.15rem;
+}
+
+.person-month-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.person-month-scroll::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+
+.person-month-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 .person-month-header h3 {
@@ -728,6 +755,10 @@
 @media (max-width: 700px) {
   .monthly-columns {
     grid-template-columns: 1fr;
+  }
+
+  .person-month-section {
+    max-height: min(22rem, 45vh);
   }
 
   .monthly-totals {

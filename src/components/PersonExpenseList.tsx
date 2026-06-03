@@ -49,18 +49,20 @@ export function PersonExpenseList({
       {list.length === 0 ? (
         <p className="person-month-empty">Nenhum gasto neste mês.</p>
       ) : (
-        <ul className="person-month-list">
-          {list.map((entry) => (
-            <ExpenseRow
-              key={`${entry.expenseId}-${entry.installment?.current ?? 'full'}`}
-              entry={entry}
-              canEdit={canEdit}
-              onRemove={onRemove}
-              onUpdate={onUpdate}
-              disabled={disabled}
-            />
-          ))}
-        </ul>
+        <div className="person-month-scroll">
+          <ul className="person-month-list">
+            {list.map((entry) => (
+              <ExpenseRow
+                key={`${entry.expenseId}-${entry.installment?.current ?? 'full'}`}
+                entry={entry}
+                canEdit={canEdit}
+                onRemove={onRemove}
+                onUpdate={onUpdate}
+                disabled={disabled}
+              />
+            ))}
+          </ul>
+        </div>
       )}
     </section>
   )
