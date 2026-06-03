@@ -1,5 +1,12 @@
 [
   {
+    "id": "9f4b6d53-36ce-427a-98df-86c4f14b1428",
+    "description": "Ração dos Gatos - Pix",
+    "amount": 137.9,
+    "paidBy": "diogo",
+    "date": "2026-06-02"
+  },
+  {
     "id": "31088803-ccf5-400b-a804-dd6ad40de61c",
     "description": "Mercado Supermarket - Débito",
     "amount": 60,
