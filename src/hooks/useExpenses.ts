@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { readExpensesCache, writeExpensesCache } from '../lib/expenseCache'
 import { findExpense, normalizeExpense } from '../lib/expenses'
 import { fetchExpenses, isSyncConfigured, saveExpenses } from '../lib/sync'
+import { SYNC_POLL_MS } from '../lib/syncConfig'
 import type { Expense, PaymentMethod, Person } from '../types'
 
 const LEGACY_STORAGE_KEY = 'financas-da-casa-expenses'
-const POLL_MS = 1200
+
+export type SyncState = 'loading' | 'ok' | 'stale' | 'error'
 
 export function useExpenses() {
-  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [expenses, setExpenses] = useState<Expense[]>(() => readExpensesCache())
   const [loading, setLoading] = useState(true)
-  const [synced, setSynced] = useState(false)
+  const [syncState, setSyncState] = useState<SyncState>('loading')
   const [error, setError] = useState<string | null>(null)
   const expensesRef = useRef(expenses)
   const savingRef = useRef(false)
@@ -17,20 +20,35 @@ export function useExpenses() {
   expensesRef.current = expenses
 
   const pull = useCallback(async () => {
-    if (!isSyncConfigured) return
-    if (savingRef.current) return
+    if (!isSyncConfigured) return null
+    if (savingRef.current) return null
 
     try {
       const data = await fetchExpenses()
       setExpenses(data)
-      setSynced(true)
+      writeExpensesCache(data)
+      setSyncState('ok')
       setLoading(false)
       setError(null)
       return data
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro de sincronização')
+      const cached = readExpensesCache()
+      const fallback =
+        expensesRef.current.length > 0 ? expensesRef.current : cached
+
+      if (fallback.length > 0) {
+        setExpenses(fallback)
+        setSyncState('stale')
+        setError(
+          'Não foi possível sincronizar agora. Mostrando a última cópia salva — os dados no GitHub estão seguros.',
+        )
+      } else {
+        setSyncState('error')
+        setError(
+          err instanceof Error ? err.message : 'Não foi possível carregar a planilha',
+        )
+      }
       setLoading(false)
-      setSynced(false)
       return null
     }
   }, [])
@@ -39,6 +57,7 @@ export function useExpenses() {
     if (!isSyncConfigured) {
       setError('sync-not-configured')
       setLoading(false)
+      setSyncState('error')
       return
     }
 
@@ -59,8 +78,11 @@ export function useExpenses() {
             if (migrated.length > 0) {
               savingRef.current = true
               await saveExpenses(migrated)
+              writeExpensesCache(migrated)
               localStorage.removeItem(LEGACY_STORAGE_KEY)
               setExpenses(migrated)
+              setSyncState('ok')
+              setError(null)
             }
           }
         } catch {
@@ -72,7 +94,7 @@ export function useExpenses() {
     }
 
     void init()
-    const id = setInterval(() => void pull(), POLL_MS)
+    const id = setInterval(() => void pull(), SYNC_POLL_MS)
 
     return () => {
       cancelled = true
@@ -84,19 +106,24 @@ export function useExpenses() {
     async (next: Expense[]) => {
       savingRef.current = true
       setExpenses(next)
+      writeExpensesCache(next)
       try {
         await saveExpenses(next)
-        setSynced(true)
+        setSyncState('ok')
         setError(null)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erro ao salvar')
-        await pull()
+        setSyncState('stale')
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Não foi possível salvar na nuvem. Tente de novo em alguns minutos.',
+        )
         throw err
       } finally {
         savingRef.current = false
       }
     },
-    [pull],
+    [],
   )
 
   const addExpense = useCallback(
@@ -171,7 +198,8 @@ export function useExpenses() {
   return {
     expenses,
     loading,
-    synced,
+    synced: syncState === 'ok',
+    syncState,
     error,
     addExpense,
     removeExpense,

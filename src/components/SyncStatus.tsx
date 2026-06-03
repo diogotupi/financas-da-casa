@@ -1,10 +1,13 @@
+import type { SyncState } from '../hooks/useExpenses'
+
 interface Props {
   loading: boolean
   synced: boolean
+  syncState: SyncState
   error: string | null
 }
 
-export function SyncStatus({ loading, synced, error }: Props) {
+export function SyncStatus({ loading, synced, syncState, error }: Props) {
   if (error === 'sync-not-configured') {
     return (
       <div className="sync-banner sync-warning" role="status">
@@ -14,7 +17,16 @@ export function SyncStatus({ loading, synced, error }: Props) {
     )
   }
 
-  if (error) {
+  if (syncState === 'stale' && error) {
+    return (
+      <div className="sync-banner sync-warning" role="alert">
+        <span aria-hidden>⚠️</span>
+        <span>{error}</span>
+      </div>
+    )
+  }
+
+  if (syncState === 'error' && error) {
     return (
       <div className="sync-banner sync-error" role="alert">
         <span aria-hidden>❌</span>
@@ -23,7 +35,7 @@ export function SyncStatus({ loading, synced, error }: Props) {
     )
   }
 
-  if (loading) {
+  if (loading && !synced) {
     return (
       <div className="sync-banner sync-loading" role="status">
         <span className="sync-dot pulse" aria-hidden />

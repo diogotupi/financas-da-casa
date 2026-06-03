@@ -11,10 +11,18 @@ import type { MonthKey } from './types'
 import './App.css'
 
 function App() {
-  const { expenses, loading, synced, error, addExpense, removeExpense, updateExpense } =
-    useExpenses()
+  const {
+    expenses,
+    loading,
+    synced,
+    syncState,
+    error,
+    addExpense,
+    removeExpense,
+    updateExpense,
+  } = useExpenses()
   const { profiles, uploading, uploadPhoto } = useProfiles()
-  const disabled = loading || !!error
+  const disabled = loading && expenses.length === 0
 
   const availableMonths = useMemo(() => getAvailableMonths(expenses), [expenses])
   const [monthKey, setMonthKey] = useState<MonthKey>(currentMonthKey)
@@ -42,7 +50,7 @@ function App() {
       </header>
 
       <main>
-        <SyncStatus loading={loading} synced={synced} error={error} />
+        <SyncStatus loading={loading} synced={synced} syncState={syncState} error={error} />
         <ExpenseForm
           onAdd={addExpense}
           profiles={profiles}

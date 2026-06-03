@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { fetchProfiles, isSyncConfigured, saveProfiles } from '../lib/sync'
+import { SYNC_POLL_MS } from '../lib/syncConfig'
 import type { Person, Profiles } from '../types'
-
-const POLL_MS = 1200
 
 export function useProfiles() {
   const [profiles, setProfiles] = useState<Profiles>({})
@@ -28,7 +27,7 @@ export function useProfiles() {
     if (!isSyncConfigured) return
 
     void pull()
-    const id = setInterval(() => void pull(), POLL_MS)
+    const id = setInterval(() => void pull(), SYNC_POLL_MS)
     return () => clearInterval(id)
   }, [pull])
 
