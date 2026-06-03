@@ -1,5 +1,13 @@
 [
   {
+    "id": "a6e4672e-70e5-4bff-8fd5-f20eba48f209",
+    "description": "Comida da Tia",
+    "amount": 15,
+    "paidBy": "camila",
+    "date": "2026-06-03",
+    "paymentMethod": "debito"
+  },
+  {
     "id": "3382713e-0016-4170-abdf-985e8f4637c6",
     "description": "Mercado Mundial",
     "amount": 100,
