@@ -1,5 +1,13 @@
 [
   {
+    "id": "1ab832b9-c287-434c-a15c-0e3074eaa1df",
+    "description": "Casas Pedro",
+    "amount": 70,
+    "paidBy": "diogo",
+    "date": "2026-06-02",
+    "paymentMethod": "credito"
+  },
+  {
     "id": "2948cbe0-5b45-48ca-a72e-124f0e96b49b",
     "description": "Supermarket",
     "amount": 60,
