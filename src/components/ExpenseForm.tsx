@@ -36,8 +36,12 @@ export function ExpenseForm({ onAdd, profiles, monthKey, disabled }: Props) {
     const parsed = parseFloat(amount.replace(',', '.'))
     if (!description.trim() || !parsed || parsed <= 0 || disabled || saving) return
 
-    const parcelas =
-      paymentMethod === 'credito' ? Math.max(2, parseInt(installments, 10) || 2) : undefined
+    let parcelas: number | undefined
+    if (paymentMethod === 'credito') {
+      const n = parseInt(installments, 10)
+      const count = Number.isFinite(n) && n >= 1 ? Math.min(48, Math.floor(n)) : 1
+      parcelas = count >= 2 ? count : undefined
+    }
 
     setSaving(true)
     try {
@@ -144,14 +148,15 @@ export function ExpenseForm({ onAdd, profiles, monthKey, disabled }: Props) {
           <span>Parcelas</span>
           <input
             type="number"
-            min={2}
+            min={1}
             max={48}
             value={installments}
             onChange={(e) => setInstallments(e.target.value)}
             required
           />
           <p className="field-hint">
-            O valor total será dividido nos meses seguintes (ex.: 3x de R$ 100 em jun, jul e ago).
+            1x: entra só no mês da compra. 2 ou mais: divide o total nos meses seguintes (ex.: 3x de R$
+            100 em jun, jul e ago).
           </p>
         </label>
       )}

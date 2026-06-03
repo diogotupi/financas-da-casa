@@ -15,7 +15,7 @@ export interface Expense {
   paidBy: Person
   date: string
   paymentMethod: PaymentMethod
-  /** Só para crédito — número de parcelas (≥ 2) */
+  /** Só para crédito parcelado — número de parcelas (≥ 2); omitido ou 1 = à vista, só no mês da compra */
   installments?: number
 }
 

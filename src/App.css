@@ -166,6 +166,7 @@
 .form-row {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-end;
   gap: 1rem;
   margin-bottom: 1rem;
 }
@@ -182,7 +183,11 @@
 }
 
 .field.field-amount {
-  flex: 0 0 120px;
+  flex: 0 0 9.5rem;
+}
+
+.field.field-amount > span {
+  white-space: nowrap;
 }
 
 .field span,
@@ -520,17 +525,17 @@
 
 .person-expense-main {
   display: flex;
-  gap: 0.5rem;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.4rem;
   margin-bottom: 0.5rem;
 }
 
-.person-expense-fields {
-  flex: 1;
-  min-width: 0;
+.person-expense-bottom {
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .row-date {
@@ -566,13 +571,17 @@
 }
 
 .row-edit-title {
-  flex: 1;
-  min-width: 0;
   width: 100%;
-  max-width: 100%;
+  min-width: 0;
   font-size: 1rem;
   font-weight: 600;
+  line-height: 1.4;
   box-sizing: border-box;
+  resize: none;
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
+  field-sizing: content;
 }
 
 .row-edit-amount {
@@ -581,8 +590,11 @@
   font-weight: 700;
   color: var(--text);
   text-align: right;
-  width: 6.5rem;
+  width: auto;
+  min-width: 5.5rem;
+  max-width: 100%;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .btn-ghost {
@@ -688,14 +700,13 @@
     grid-template-columns: 1fr;
   }
 
-  .person-expense-main {
-    flex-wrap: wrap;
+  .person-expense-bottom {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .row-edit-amount {
-    flex: 1 1 100%;
     width: 100%;
-    max-width: 100%;
     text-align: left;
   }
 

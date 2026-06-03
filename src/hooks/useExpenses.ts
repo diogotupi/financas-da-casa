@@ -115,7 +115,9 @@ export function useExpenses() {
         paidBy: data.paidBy,
         date: data.date,
         paymentMethod: data.paymentMethod,
-        ...(data.paymentMethod === 'credito' && data.installments
+        ...(data.paymentMethod === 'credito' &&
+        data.installments &&
+        data.installments >= 2
           ? { installments: data.installments }
           : {}),
       }

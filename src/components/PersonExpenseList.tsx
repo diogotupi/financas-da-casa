@@ -1,4 +1,4 @@
-import { useEffect, useState, type KeyboardEvent } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
 import {
   formatDate,
   formatMonthLabel,
@@ -85,6 +85,7 @@ function ExpenseRow({
   const [label, setLabel] = useState(entry.label)
   const [amount, setAmount] = useState(formatAmountInput(entry.amount))
   const [editing, setEditing] = useState(false)
+  const descriptionRef = useRef<HTMLTextAreaElement>(null)
   const isSlice = Boolean(entry.installment)
 
   useEffect(() => {
@@ -93,6 +94,10 @@ function ExpenseRow({
       setAmount(formatAmountInput(entry.amount))
     }
   }, [entry.label, entry.amount, editing])
+
+  useLayoutEffect(() => {
+    resizeDescription(descriptionRef.current)
+  }, [label])
 
   async function commitEdits() {
     const nextLabel = label.trim()
@@ -119,24 +124,49 @@ function ExpenseRow({
     }
   }
 
+  function resizeDescription(el: HTMLTextAreaElement | null) {
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }
+
   return (
     <li className={`person-expense-row ${isSlice ? 'is-installment' : ''}`}>
       <div className="person-expense-main">
-        <div className="person-expense-fields">
-          <input
-            type="text"
-            className="row-edit row-edit-title"
-            value={label}
-            disabled={disabled}
-            aria-label="Descrição"
-            onChange={(e) => setLabel(e.target.value)}
-            onFocus={() => setEditing(true)}
-            onBlur={() => {
+        <textarea
+          className="row-edit row-edit-title"
+          rows={1}
+          value={label}
+          disabled={disabled}
+          aria-label="Descrição"
+          onChange={(e) => {
+            setLabel(e.target.value)
+            resizeDescription(e.target)
+          }}
+          onFocus={(e) => {
+            setEditing(true)
+            resizeDescription(e.currentTarget)
+          }}
+          onBlur={(e) => {
+            setEditing(false)
+            resizeDescription(e.target)
+            void commitEdits()
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              e.currentTarget.blur()
+            }
+            if (e.key === 'Escape') {
+              setLabel(entry.label)
+              setAmount(formatAmountInput(entry.amount))
               setEditing(false)
-              void commitEdits()
-            }}
-            onKeyDown={handleKeyDown}
-          />
+              e.currentTarget.blur()
+            }
+          }}
+          ref={descriptionRef}
+        />
+        <div className="person-expense-bottom">
           <div className="row-meta-line">
             <span className={`payment-badge payment-badge--${entry.paymentMethod}`}>
               {PAYMENT_METHODS[entry.paymentMethod].label}
@@ -145,22 +175,22 @@ function ExpenseRow({
               {isSlice ? `Compra em ${formatDate(entry.purchaseDate)}` : formatDate(entry.purchaseDate)}
             </span>
           </div>
+          <input
+            type="text"
+            inputMode="decimal"
+            className="row-edit row-edit-amount"
+            value={amount}
+            disabled={disabled}
+            aria-label={isSlice ? 'Valor da parcela' : 'Valor'}
+            onChange={(e) => setAmount(e.target.value)}
+            onFocus={() => setEditing(true)}
+            onBlur={() => {
+              setEditing(false)
+              void commitEdits()
+            }}
+            onKeyDown={handleKeyDown}
+          />
         </div>
-        <input
-          type="text"
-          inputMode="decimal"
-          className="row-edit row-edit-amount"
-          value={amount}
-          disabled={disabled}
-          aria-label={isSlice ? 'Valor da parcela' : 'Valor'}
-          onChange={(e) => setAmount(e.target.value)}
-          onFocus={() => setEditing(true)}
-          onBlur={() => {
-            setEditing(false)
-            void commitEdits()
-          }}
-          onKeyDown={handleKeyDown}
-        />
       </div>
       <button
         type="button"
