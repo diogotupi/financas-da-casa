@@ -1,5 +1,13 @@
 [
   {
+    "id": "d3782abf-f581-4458-a1de-aae885e5309e",
+    "description": "Petfun (Enzimac+Lata)",
+    "amount": 57.08,
+    "paidBy": "diogo",
+    "date": "2026-06-03",
+    "paymentMethod": "credito"
+  },
+  {
     "id": "1a96e047-22f3-4d70-8f91-bbd0f042308e",
     "description": "Pão de Açúcar",
     "amount": 50.32,
