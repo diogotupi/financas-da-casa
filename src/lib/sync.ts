@@ -7,6 +7,7 @@ const API_BASE =
 
 export const EXPENSES_API = `${API_BASE}/api/expenses`
 export const PROFILES_API = `${API_BASE}/api/profiles`
+export const PASSWORD_API = `${API_BASE}/api/password`
 
 export const isSyncConfigured = Boolean(EXPENSES_API)
 
@@ -43,4 +44,30 @@ export async function saveProfiles(profiles: Profiles): Promise<void> {
     body: JSON.stringify(profiles),
   })
   if (!res.ok) throw new Error('Não foi possível salvar a foto')
+}
+
+export async function fetchPassword(): Promise<string> {
+  const res = await fetch(PASSWORD_API, { cache: 'no-store' })
+  if (!res.ok) throw new Error('Não foi possível carregar a senha')
+  const data = await res.json()
+  if (data && typeof data.password === 'string' && data.password.length > 0) {
+    return data.password
+  }
+  throw new Error('Resposta de senha inválida')
+}
+
+export async function updatePassword(currentPassword: string, newPassword: string): Promise<void> {
+  const res = await fetch(PASSWORD_API, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  })
+  if (res.status === 403) {
+    throw new Error('Senha atual incorreta.')
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    const msg = err && typeof err.error === 'string' ? err.error : 'Não foi possível salvar a senha'
+    throw new Error(msg)
+  }
 }

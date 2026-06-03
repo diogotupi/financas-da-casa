@@ -1,5 +1,5 @@
-import { type FormEvent, useState } from 'react'
-import { isAuthenticated, setAuthenticated, verifyPassword } from '../lib/auth'
+import { type FormEvent, useEffect, useState } from 'react'
+import { initAuth, isAuthenticated, setAuthenticated, verifyPassword } from '../lib/auth'
 import './PasswordGate.css'
 
 interface Props {
@@ -7,9 +7,14 @@ interface Props {
 }
 
 export function PasswordGate({ children }: Props) {
+  const [ready, setReady] = useState(false)
   const [unlocked, setUnlocked] = useState(isAuthenticated)
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
+
+  useEffect(() => {
+    void initAuth().then(() => setReady(true))
+  }, [])
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -21,6 +26,16 @@ export function PasswordGate({ children }: Props) {
     }
     setError(true)
     setPassword('')
+  }
+
+  if (!ready) {
+    return (
+      <div className="password-gate">
+        <div className="password-card">
+          <p className="password-hint">Carregando…</p>
+        </div>
+      </div>
+    )
   }
 
   if (unlocked) return children

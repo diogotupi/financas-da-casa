@@ -1,5 +1,5 @@
 import { type FormEvent, useState } from 'react'
-import { setPassword, verifyPassword } from '../lib/auth'
+import { changePassword } from '../lib/auth'
 import './ChangePassword.css'
 
 type Feedback = { type: 'error' | 'success'; message: string } | null
@@ -9,48 +9,45 @@ export function ChangePassword() {
   const [next, setNext] = useState('')
   const [confirm, setConfirm] = useState('')
   const [feedback, setFeedback] = useState<Feedback>(null)
+  const [saving, setSaving] = useState(false)
 
   function clearFeedback() {
     setFeedback(null)
   }
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     clearFeedback()
-
-    if (!verifyPassword(current)) {
-      setFeedback({ type: 'error', message: 'Senha atual incorreta.' })
-      setCurrent('')
-      return
-    }
-
-    if (!next.trim()) {
-      setFeedback({ type: 'error', message: 'Digite a nova senha.' })
-      return
-    }
 
     if (next !== confirm) {
       setFeedback({ type: 'error', message: 'A confirmação não coincide com a nova senha.' })
       return
     }
 
-    if (next === current) {
-      setFeedback({ type: 'error', message: 'A nova senha deve ser diferente da atual.' })
-      return
+    setSaving(true)
+    try {
+      await changePassword(current, next)
+      setCurrent('')
+      setNext('')
+      setConfirm('')
+      setFeedback({
+        type: 'success',
+        message: 'Senha alterada para todos os dispositivos. Use a nova senha na próxima vez que entrar.',
+      })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Não foi possível alterar a senha.'
+      setFeedback({ type: 'error', message })
+      if (message.includes('atual incorreta')) setCurrent('')
+    } finally {
+      setSaving(false)
     }
-
-    setPassword(next)
-    setCurrent('')
-    setNext('')
-    setConfirm('')
-    setFeedback({ type: 'success', message: 'Senha alterada. Use a nova senha na próxima vez que entrar.' })
   }
 
   return (
     <section className="change-password">
       <details>
         <summary>Alterar senha</summary>
-        <form className="change-password-form" onSubmit={handleSubmit}>
+        <form className="change-password-form" onSubmit={(e) => void handleSubmit(e)}>
           <label className="change-password-field">
             <span>Senha atual</span>
             <input
@@ -62,6 +59,7 @@ export function ChangePassword() {
               }}
               autoComplete="current-password"
               required
+              disabled={saving}
             />
           </label>
           <label className="change-password-field">
@@ -75,6 +73,7 @@ export function ChangePassword() {
               }}
               autoComplete="new-password"
               required
+              disabled={saving}
             />
           </label>
           <label className="change-password-field">
@@ -88,6 +87,7 @@ export function ChangePassword() {
               }}
               autoComplete="new-password"
               required
+              disabled={saving}
             />
           </label>
 
@@ -102,8 +102,8 @@ export function ChangePassword() {
             </p>
           )}
 
-          <button type="submit" className="btn-ghost change-password-submit">
-            Salvar nova senha
+          <button type="submit" className="btn-ghost change-password-submit" disabled={saving}>
+            {saving ? 'Salvando…' : 'Salvar nova senha'}
           </button>
         </form>
       </details>
