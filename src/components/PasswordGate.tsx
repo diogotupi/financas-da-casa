@@ -31,9 +31,12 @@ export function PasswordGate({ children }: Props) {
       await login(user, password)
       setUnlocked(true)
       setPassword('')
-    } catch {
+    } catch (err) {
       setError(true)
       setPassword('')
+      if (err instanceof Error && !err.message.includes('incorretos')) {
+        console.warn('Login:', err.message)
+      }
     } finally {
       setSubmitting(false)
     }
@@ -104,7 +107,8 @@ export function PasswordGate({ children }: Props) {
 
           {error && (
             <p className="password-error" role="alert">
-              Usuário ou senha incorretos.
+              Usuário ou senha incorretos. Se acabou de mudar a senha, use a nova. Padrão inicial:
+              abc123 para ambos.
             </p>
           )}
 

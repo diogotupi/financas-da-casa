@@ -4,7 +4,12 @@ export type HouseUser = 'diogo' | 'camila'
 
 const USERS_PATH = 'data/users.json'
 const LEGACY_PASSWORD_PATH = 'data/password.json'
-const DEFAULT_PASSWORD = 'abc123'
+export const DEFAULT_PASSWORD = 'abc123'
+
+const DEFAULT_USERS: Record<HouseUser, string> = {
+  diogo: DEFAULT_PASSWORD,
+  camila: DEFAULT_PASSWORD,
+}
 
 export function isHouseUser(value: unknown): value is HouseUser {
   return value === 'diogo' || value === 'camila'
@@ -20,23 +25,42 @@ function readUsersMap(data: unknown): Partial<Record<HouseUser, string>> {
   return out
 }
 
+function isGitHubUnavailable(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message.toLowerCase() : ''
+  return msg.includes('rate limit') || msg.includes('github get falhou')
+}
+
+/** Nunca lança — em falha do GitHub usa senhas padrão para o site não ficar trancado */
 export async function loadUserPasswords(): Promise<Record<HouseUser, string>> {
-  const usersRaw = await githubGetJson(USERS_PATH)
+  let usersRaw: unknown = null
+  try {
+    usersRaw = await githubGetJson(USERS_PATH)
+  } catch (err) {
+    if (isGitHubUnavailable(err)) return { ...DEFAULT_USERS }
+  }
+
   const map = readUsersMap(usersRaw)
   if (map.diogo && map.camila) {
     return { diogo: map.diogo, camila: map.camila }
   }
-
-  const legacyRaw = await githubGetJson(LEGACY_PASSWORD_PATH)
-  let legacy = DEFAULT_PASSWORD
-  if (legacyRaw && typeof legacyRaw === 'object' && !Array.isArray(legacyRaw)) {
-    const p = (legacyRaw as { password?: unknown }).password
-    if (typeof p === 'string' && p.length > 0) legacy = p
+  if (map.diogo || map.camila) {
+    return {
+      diogo: map.diogo ?? DEFAULT_PASSWORD,
+      camila: map.camila ?? DEFAULT_PASSWORD,
+    }
   }
 
-  return {
-    diogo: map.diogo ?? legacy,
-    camila: map.camila ?? legacy,
+  try {
+    const legacyRaw = await githubGetJson(LEGACY_PASSWORD_PATH)
+    let legacy = DEFAULT_PASSWORD
+    if (legacyRaw && typeof legacyRaw === 'object' && !Array.isArray(legacyRaw)) {
+      const p = (legacyRaw as { password?: unknown }).password
+      if (typeof p === 'string' && p.length > 0) legacy = p
+    }
+    return { diogo: legacy, camila: legacy }
+  } catch (err) {
+    if (isGitHubUnavailable(err)) return { ...DEFAULT_USERS }
+    return { ...DEFAULT_USERS }
   }
 }
 

@@ -1,4 +1,5 @@
-import { loginUser, updateUserPassword } from './sync'
+import { loginUser, updateUserPassword, isRateLimitError } from './sync'
+import { cachePasswordForUser, verifyOfflinePassword } from './userPasswordCache'
 import type { Person } from '../types'
 
 const SESSION_KEY = 'financas-da-casa-session'
@@ -38,9 +39,30 @@ export function isAuthenticated(): boolean {
   return readSession() !== null
 }
 
+function isOfflineLoginError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false
+  if (isRateLimitError(err)) return true
+  const msg = err.message.toLowerCase()
+  return (
+    msg.includes('não foi possível entrar') ||
+    msg.includes('github get falhou') ||
+    msg.includes('erro interno')
+  )
+}
+
 export async function login(user: Person, password: string): Promise<void> {
-  await loginUser(user, password)
+  try {
+    await loginUser(user, password)
+  } catch (err) {
+    if (isOfflineLoginError(err) && verifyOfflinePassword(user, password)) {
+      writeSession({ user, password })
+      cachePasswordForUser(user, password)
+      return
+    }
+    throw err
+  }
   writeSession({ user, password })
+  cachePasswordForUser(user, password)
 }
 
 export async function logout(): Promise<void> {
@@ -49,7 +71,7 @@ export async function logout(): Promise<void> {
 
 let initPromise: Promise<boolean> | null = null
 
-/** Revalida sessão guardada com a API */
+/** Revalida sessão; se a API estiver no limite, mantém sessão com senha em cache */
 export function initAuth(): Promise<boolean> {
   if (!initPromise) {
     initPromise = (async () => {
@@ -58,7 +80,13 @@ export function initAuth(): Promise<boolean> {
       try {
         await loginUser(session.user, session.password)
         return true
-      } catch {
+      } catch (err) {
+        if (
+          isOfflineLoginError(err) &&
+          verifyOfflinePassword(session.user, session.password)
+        ) {
+          return true
+        }
         clearSession()
         return false
       }
@@ -81,6 +109,17 @@ export async function changePassword(current: string, next: string): Promise<voi
     throw new Error('A nova senha deve ser diferente da atual.')
   }
 
-  await updateUserPassword(session.user, current, trimmed)
+  if (session.password !== current) {
+    throw new Error('Senha atual incorreta.')
+  }
+
+  try {
+    await updateUserPassword(session.user, current, trimmed)
+  } catch (err) {
+    if (!isOfflineLoginError(err)) throw err
+    // sem API: ainda atualiza cache local para login offline
+  }
+
   writeSession({ user: session.user, password: trimmed })
+  cachePasswordForUser(session.user, trimmed)
 }
