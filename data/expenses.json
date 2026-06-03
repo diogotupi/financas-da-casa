@@ -1,5 +1,13 @@
 [
   {
+    "id": "2948cbe0-5b45-48ca-a72e-124f0e96b49b",
+    "description": "Supermarket",
+    "amount": 60,
+    "paidBy": "camila",
+    "date": "2026-06-03",
+    "paymentMethod": "debito"
+  },
+  {
     "id": "9f4b6d53-36ce-427a-98df-86c4f14b1428",
     "description": "Ração dos Gatos",
     "amount": 137.9,
