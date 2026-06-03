@@ -102,5 +102,14 @@
     "paidBy": "camila",
     "date": "2026-05-05",
     "paymentMethod": "pix"
+  },
+  {
+    "id": "125315c4-6f6e-4731-83be-7d51f51763a9",
+    "description": "Máquina de Lavar",
+    "amount": 670,
+    "paidBy": "camila",
+    "date": "2026-05-05",
+    "paymentMethod": "credito",
+    "installments": 3
   }
 ]
