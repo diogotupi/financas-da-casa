@@ -1,5 +1,13 @@
 [
   {
+    "id": "406fc877-d3a1-40f1-ada9-e9de89d4b43e",
+    "description": "Ganchos  e Buchas Varal",
+    "amount": 4,
+    "paidBy": "camila",
+    "date": "2026-06-03",
+    "paymentMethod": "debito"
+  },
+  {
     "id": "a6e4672e-70e5-4bff-8fd5-f20eba48f209",
     "description": "Comida da Tia",
     "amount": 15,
