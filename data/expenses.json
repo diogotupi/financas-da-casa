@@ -110,5 +110,13 @@
     "paidBy": "camila",
     "date": "2026-06-04",
     "paymentMethod": "debito"
+  },
+  {
+    "id": "d0c8911d-8b8a-4dd4-8602-8be90b5e278f",
+    "description": "Maria",
+    "amount": 180,
+    "paidBy": "diogo",
+    "date": "2026-06-03",
+    "paymentMethod": "pix"
   }
 ]
