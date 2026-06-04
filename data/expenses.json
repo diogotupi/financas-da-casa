@@ -128,5 +128,13 @@
     "date": "2026-04-15",
     "paymentMethod": "credito",
     "installments": 4
+  },
+  {
+    "id": "8bcc45df-9a5f-444a-97a3-06b893ab9ac0",
+    "description": "Frete + Instalação da Máquina",
+    "amount": 220,
+    "paidBy": "diogo",
+    "date": "2026-04-01",
+    "paymentMethod": "pix"
   }
 ]
