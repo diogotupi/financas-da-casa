@@ -88,14 +88,6 @@
     "paymentMethod": "debito"
   },
   {
-    "id": "edb05fd2-d14c-4e0c-a491-84d245da165c",
-    "description": "Instalação e Frete da Máquina",
-    "amount": 220,
-    "paidBy": "diogo",
-    "date": "2026-05-05",
-    "paymentMethod": "debito"
-  },
-  {
     "id": "2cc8ecf2-476b-4852-b857-c2e05f33df19",
     "description": "Pão de Açúcar",
     "amount": 38.47,
