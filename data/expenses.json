@@ -104,15 +104,6 @@
     "paymentMethod": "pix"
   },
   {
-    "id": "2da1287e-ecdd-4ec4-8d9a-0d65d165dedf",
-    "description": "Máquina de Lavar",
-    "amount": 667.39,
-    "paidBy": "camila",
-    "date": "2026-04-15",
-    "paymentMethod": "credito",
-    "installments": 3
-  },
-  {
     "id": "377faf33-1962-43c4-b2da-5e8d5e3796c5",
     "description": "Varal de Teto",
     "amount": 124.24,
