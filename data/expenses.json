@@ -143,5 +143,14 @@
     "date": "2026-05-15",
     "paymentMethod": "credito",
     "installments": 3
+  },
+  {
+    "id": "fcfc078a-2c14-4a34-8b82-342dd43acee1",
+    "description": "Varal de Teto",
+    "amount": 124.24,
+    "paidBy": "camila",
+    "date": "2026-06-16",
+    "paymentMethod": "credito",
+    "installments": 4
   }
 ]
