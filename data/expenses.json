@@ -144,5 +144,13 @@
     "paidBy": "diogo",
     "date": "2026-03-10",
     "paymentMethod": "debito"
+  },
+  {
+    "id": "b7a8e95b-bf7b-4497-94d9-c028d98c66a3",
+    "description": "Internet",
+    "amount": 94.9,
+    "paidBy": "diogo",
+    "date": "2026-04-10",
+    "paymentMethod": "debito"
   }
 ]
