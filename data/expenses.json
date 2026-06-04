@@ -118,5 +118,14 @@
     "paidBy": "diogo",
     "date": "2026-06-03",
     "paymentMethod": "pix"
+  },
+  {
+    "id": "2da1287e-ecdd-4ec4-8d9a-0d65d165dedf",
+    "description": "Máquina de Lavar",
+    "amount": 667.39,
+    "paidBy": "camila",
+    "date": "2026-04-15",
+    "paymentMethod": "credito",
+    "installments": 3
   }
 ]
