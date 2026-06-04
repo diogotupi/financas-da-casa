@@ -80,14 +80,6 @@
     "paymentMethod": "pix"
   },
   {
-    "id": "956ac25d-cae1-49c4-a7f5-17a4950fd825",
-    "description": "Internet",
-    "amount": 94.9,
-    "paidBy": "diogo",
-    "date": "2026-06-10",
-    "paymentMethod": "debito"
-  },
-  {
     "id": "2cc8ecf2-476b-4852-b857-c2e05f33df19",
     "description": "Pão de Açúcar",
     "amount": 38.47,
