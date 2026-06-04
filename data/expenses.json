@@ -104,15 +104,6 @@
     "paymentMethod": "pix"
   },
   {
-    "id": "377faf33-1962-43c4-b2da-5e8d5e3796c5",
-    "description": "Varal de Teto",
-    "amount": 124.24,
-    "paidBy": "camila",
-    "date": "2026-04-15",
-    "paymentMethod": "credito",
-    "installments": 4
-  },
-  {
     "id": "8bcc45df-9a5f-444a-97a3-06b893ab9ac0",
     "description": "Frete + Instalação da Máquina",
     "amount": 220,
