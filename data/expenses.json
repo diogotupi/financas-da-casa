@@ -102,5 +102,13 @@
     "paidBy": "diogo",
     "date": "2026-06-03",
     "paymentMethod": "credito"
+  },
+  {
+    "id": "b27fbb55-bc13-4ce2-91c8-b80b294dfdc3",
+    "description": "Farmácia (Freeco/Secar...)",
+    "amount": 63.63,
+    "paidBy": "camila",
+    "date": "2026-06-04",
+    "paymentMethod": "debito"
   }
 ]
