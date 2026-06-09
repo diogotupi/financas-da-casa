@@ -160,5 +160,13 @@
     "paidBy": "diogo",
     "date": "2026-06-08",
     "paymentMethod": "credito"
+  },
+  {
+    "id": "eceb71c9-3916-4918-a3e8-3bba272aa9a7",
+    "description": "Comida Tia",
+    "amount": 15,
+    "paidBy": "diogo",
+    "date": "2026-06-09",
+    "paymentMethod": "credito"
   }
 ]
