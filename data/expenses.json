@@ -192,5 +192,13 @@
     "paidBy": "diogo",
     "date": "2026-06-16",
     "paymentMethod": "credito"
+  },
+  {
+    "id": "7105a7d8-6bd3-48bb-a174-6e2e38e3d21e",
+    "description": "Pão de Açúcar - Biscoito Creme Cracker, Tapioca, etc",
+    "amount": 41.66,
+    "paidBy": "diogo",
+    "date": "2026-06-15",
+    "paymentMethod": "credito"
   }
 ]
