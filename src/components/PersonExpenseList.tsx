@@ -16,7 +16,7 @@ interface Props {
   onRemove: (id: string) => Promise<void>
   onUpdate: (
     id: string,
-    patch: { description?: string; amount?: number },
+    patch: { description?: string; amount?: number; date?: string },
     options?: { fromInstallmentSlice?: boolean },
   ) => Promise<void>
   disabled?: boolean
@@ -85,7 +85,7 @@ function ExpenseRow({
   onRemove: (id: string) => Promise<void>
   onUpdate: (
     id: string,
-    patch: { description?: string; amount?: number },
+    patch: { description?: string; amount?: number; date?: string },
     options?: { fromInstallmentSlice?: boolean },
   ) => Promise<void>
   disabled?: boolean
@@ -93,6 +93,7 @@ function ExpenseRow({
   const readOnly = disabled || !canEdit
   const [label, setLabel] = useState(entry.label)
   const [amount, setAmount] = useState(formatAmountInput(entry.amount))
+  const [date, setDate] = useState(toDateInputValue(entry.purchaseDate))
   const [editing, setEditing] = useState(false)
   const descriptionRef = useRef<HTMLTextAreaElement>(null)
   const isSlice = Boolean(entry.installment)
@@ -101,8 +102,9 @@ function ExpenseRow({
     if (!editing) {
       setLabel(entry.label)
       setAmount(formatAmountInput(entry.amount))
+      setDate(toDateInputValue(entry.purchaseDate))
     }
-  }, [entry.label, entry.amount, editing])
+  }, [entry.label, entry.amount, entry.purchaseDate, editing])
 
   useLayoutEffect(() => {
     resizeDescription(descriptionRef.current)
@@ -111,14 +113,15 @@ function ExpenseRow({
   async function commitEdits() {
     const nextLabel = label.trim()
     const nextAmount = parseAmount(amount)
-    if (!nextLabel || !nextAmount || nextAmount <= 0) {
+    if (!nextLabel || !nextAmount || nextAmount <= 0 || !date) {
       setLabel(entry.label)
       setAmount(formatAmountInput(entry.amount))
+      setDate(toDateInputValue(entry.purchaseDate))
       return
     }
     await onUpdate(
       entry.expenseId,
-      { description: nextLabel, amount: nextAmount },
+      { description: nextLabel, amount: nextAmount, date },
       { fromInstallmentSlice: isSlice },
     )
   }
@@ -128,6 +131,7 @@ function ExpenseRow({
     if (e.key === 'Escape') {
       setLabel(entry.label)
       setAmount(formatAmountInput(entry.amount))
+      setDate(toDateInputValue(entry.purchaseDate))
       setEditing(false)
       e.currentTarget.blur()
     }
@@ -185,9 +189,31 @@ function ExpenseRow({
             <span className={`payment-badge payment-badge--${entry.paymentMethod}`}>
               {PAYMENT_METHODS[entry.paymentMethod].label}
             </span>
-            <span className="row-date">
-              {isSlice ? `Compra em ${formatDate(entry.purchaseDate)}` : formatDate(entry.purchaseDate)}
-            </span>
+            {readOnly ? (
+              <span className="row-date">
+                {isSlice
+                  ? `Compra em ${formatDate(entry.purchaseDate)}`
+                  : formatDate(entry.purchaseDate)}
+              </span>
+            ) : (
+              <label className="row-date-edit">
+                {isSlice && <span className="row-date-prefix">Compra em</span>}
+                <input
+                  type="date"
+                  className="row-edit row-edit-date"
+                  value={date}
+                  aria-label={isSlice ? 'Data da compra' : 'Data'}
+                  onChange={(e) => {
+                    setDate(e.target.value)
+                    setEditing(true)
+                  }}
+                  onBlur={() => {
+                    setEditing(false)
+                    void commitEdits()
+                  }}
+                />
+              </label>
+            )}
           </div>
           <input
             type="text"
@@ -228,4 +254,8 @@ function formatAmountInput(value: number) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })
+}
+
+function toDateInputValue(iso: string) {
+  return iso.slice(0, 10)
 }

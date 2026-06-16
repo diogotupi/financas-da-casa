@@ -12,7 +12,7 @@ interface Props {
   onRemove: (id: string) => Promise<void>
   onUpdate: (
     id: string,
-    patch: { description?: string; amount?: number },
+    patch: { description?: string; amount?: number; date?: string },
     options?: { fromInstallmentSlice?: boolean },
   ) => Promise<void>
   disabled?: boolean

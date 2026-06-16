@@ -169,7 +169,7 @@ export function useExpenses() {
   const updateExpense = useCallback(
     async (
       id: string,
-      patch: { description?: string; amount?: number },
+      patch: { description?: string; amount?: number; date?: string },
       options?: { fromInstallmentSlice?: boolean },
     ) => {
       const session = getSession()
@@ -179,6 +179,7 @@ export function useExpenses() {
       let description =
         patch.description !== undefined ? patch.description.trim() : current.description
       let amount = patch.amount !== undefined ? patch.amount : current.amount
+      let date = patch.date !== undefined ? patch.date : current.date
 
       if (options?.fromInstallmentSlice && current.paymentMethod === 'credito') {
         const n = current.installments ?? 1
@@ -190,11 +191,17 @@ export function useExpenses() {
         }
       }
 
-      if (!description || amount <= 0) return
-      if (description === current.description && amount === current.amount) return
+      if (!description || amount <= 0 || !date) return
+      if (
+        description === current.description &&
+        amount === current.amount &&
+        date === current.date
+      ) {
+        return
+      }
 
       const next = expensesRef.current.map((e) =>
-        e.id === id ? { ...e, description, amount } : e,
+        e.id === id ? { ...e, description, amount, date } : e,
       )
       await persist(next)
     },
