@@ -176,5 +176,13 @@
     "paidBy": "diogo",
     "date": "2026-06-16",
     "paymentMethod": "debito"
+  },
+  {
+    "id": "52cec258-b34f-47f0-a263-fe4a86f4d20f",
+    "description": "Farmácia - Luftal, Floratil, Buscopan",
+    "amount": 82.57,
+    "paidBy": "diogo",
+    "date": "2026-06-16",
+    "paymentMethod": "credito"
   }
 ]
