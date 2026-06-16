@@ -184,5 +184,13 @@
     "paidBy": "diogo",
     "date": "2026-06-16",
     "paymentMethod": "credito"
+  },
+  {
+    "id": "940423f7-2943-42dc-b8fa-73b95fd29b0d",
+    "description": "Vendinha da Esquina - Água de coco, etc...",
+    "amount": 49.6,
+    "paidBy": "diogo",
+    "date": "2026-06-16",
+    "paymentMethod": "credito"
   }
 ]
