@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cors, githubGetJson } from './lib/github.js'
+import { offlineResponse } from './lib/offline.js'
 
 /** Uma ida do navegador → expenses + profiles (2 GET no GitHub, em paralelo) */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -8,6 +9,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') {
     return res.status(204).end()
   }
+
+  if (offlineResponse(res)) return
 
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Método não permitido' })

@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cors, githubGetJson, githubPutJson } from './lib/github.js'
 import { mergeExpensesForUser } from './lib/mergeExpenses.js'
+import { offlineResponse } from './lib/offline.js'
 import { isHouseUser, loadUserPasswords, verifyUserPassword } from './lib/users.js'
 
 const PATH = 'data/expenses.json'
@@ -11,6 +12,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') {
     return res.status(204).end()
   }
+
+  if (offlineResponse(res)) return
 
   try {
     if (req.method === 'GET') {

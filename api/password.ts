@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cors, githubGetJson, githubPutJson } from './lib/github.js'
+import { offlineResponse } from './lib/offline.js'
 
 const PATH = 'data/password.json'
 const DEFAULT_PASSWORD = 'abc123'
@@ -18,6 +19,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') {
     return res.status(204).end()
   }
+
+  if (offlineResponse(res)) return
 
   try {
     if (req.method === 'GET') {

@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { cors, githubPutJson } from './lib/github.js'
+import { offlineResponse } from './lib/offline.js'
 import {
   isHouseUser,
   loadUserPasswords,
@@ -15,6 +16,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') {
     return res.status(204).end()
   }
+
+  if (offlineResponse(res)) return
 
   if (req.method !== 'PUT') {
     return res.status(405).json({ error: 'Método não permitido' })
