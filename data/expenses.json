@@ -320,5 +320,13 @@
     "paidBy": "diogo",
     "date": "2026-07-01",
     "paymentMethod": "credito"
+  },
+  {
+    "id": "a4f3ac30-a582-4ff3-aea1-50173b8301af",
+    "description": "Mundial",
+    "amount": 190.12,
+    "paidBy": "diogo",
+    "date": "2026-07-04",
+    "paymentMethod": "credito"
   }
 ]
