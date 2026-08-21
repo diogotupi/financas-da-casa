@@ -208,5 +208,13 @@
     "paidBy": "diogo",
     "date": "2026-06-12",
     "paymentMethod": "credito"
+  },
+  {
+    "id": "a8cdbdc3-fef2-40a6-8110-9afce7678e55",
+    "description": "Supermarket",
+    "amount": 51.6,
+    "paidBy": "diogo",
+    "date": "2026-06-18",
+    "paymentMethod": "credito"
   }
 ]
