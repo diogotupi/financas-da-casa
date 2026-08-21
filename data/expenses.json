@@ -216,5 +216,13 @@
     "paidBy": "diogo",
     "date": "2026-06-18",
     "paymentMethod": "credito"
+  },
+  {
+    "id": "ae42cd21-88c7-49cc-af0e-be48fa07da37",
+    "description": "Panela",
+    "amount": 79.8,
+    "paidBy": "diogo",
+    "date": "2026-06-18",
+    "paymentMethod": "credito"
   }
 ]
