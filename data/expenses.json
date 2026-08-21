@@ -424,5 +424,13 @@
     "paidBy": "diogo",
     "date": "2026-06-27",
     "paymentMethod": "debito"
+  },
+  {
+    "id": "8290b4e3-c6da-49b4-818c-2bc534cb7532",
+    "description": "Conta de Luz",
+    "amount": 173.39,
+    "paidBy": "diogo",
+    "date": "2026-07-02",
+    "paymentMethod": "pix"
   }
 ]
