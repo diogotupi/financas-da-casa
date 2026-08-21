@@ -480,5 +480,13 @@
     "paidBy": "diogo",
     "date": "2026-08-11",
     "paymentMethod": "credito"
+  },
+  {
+    "id": "d92f68c8-fa6e-47d1-a63a-fa845a33b80f",
+    "description": "Farmácia Pano de bunda e quentinho",
+    "amount": 47.37,
+    "paidBy": "diogo",
+    "date": "2026-08-12",
+    "paymentMethod": "credito"
   }
 ]
