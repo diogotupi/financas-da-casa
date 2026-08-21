@@ -456,5 +456,13 @@
     "paidBy": "diogo",
     "date": "2026-07-28",
     "paymentMethod": "credito"
+  },
+  {
+    "id": "e1a988ab-2c16-4018-a318-0f356cece018",
+    "description": "Casa Rosa Potinhos",
+    "amount": 19.98,
+    "paidBy": "diogo",
+    "date": "2026-07-28",
+    "paymentMethod": "credito"
   }
 ]
