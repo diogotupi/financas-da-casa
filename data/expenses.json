@@ -384,5 +384,13 @@
     "paidBy": "diogo",
     "date": "2026-07-14",
     "paymentMethod": "credito"
+  },
+  {
+    "id": "ed0d3b3f-dee3-42ef-b118-89c389286509",
+    "description": "Guanabara",
+    "amount": 426.63,
+    "paidBy": "diogo",
+    "date": "2026-05-12",
+    "paymentMethod": "credito"
   }
 ]
