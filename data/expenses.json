@@ -272,5 +272,13 @@
     "paidBy": "diogo",
     "date": "2026-06-22",
     "paymentMethod": "credito"
+  },
+  {
+    "id": "32a4e4d2-f6b2-4c4b-ad3c-535a21d40c53",
+    "description": "Farmácia",
+    "amount": 31.99,
+    "paidBy": "diogo",
+    "date": "2026-06-22",
+    "paymentMethod": "credito"
   }
 ]
