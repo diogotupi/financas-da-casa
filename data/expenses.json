@@ -400,5 +400,13 @@
     "paidBy": "diogo",
     "date": "2026-06-20",
     "paymentMethod": "debito"
+  },
+  {
+    "id": "99e62edc-c573-48fd-aa91-d3328f0e2a3b",
+    "description": "Shoppee - Maçaneta",
+    "amount": 207,
+    "paidBy": "diogo",
+    "date": "2026-06-17",
+    "paymentMethod": "pix"
   }
 ]
