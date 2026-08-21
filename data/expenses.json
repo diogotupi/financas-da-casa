@@ -248,5 +248,13 @@
     "paidBy": "diogo",
     "date": "2026-06-20",
     "paymentMethod": "credito"
+  },
+  {
+    "id": "91490d15-74be-4165-a6ad-002ca384037b",
+    "description": "Pao de Açúcar",
+    "amount": 46.31,
+    "paidBy": "diogo",
+    "date": "2026-06-21",
+    "paymentMethod": "credito"
   }
 ]
