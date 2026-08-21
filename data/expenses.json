@@ -352,5 +352,13 @@
     "paidBy": "diogo",
     "date": "2026-07-09",
     "paymentMethod": "credito"
+  },
+  {
+    "id": "dbceea4d-8723-4556-8d1d-747ef048df09",
+    "description": "Zona Sul",
+    "amount": 103.83,
+    "paidBy": "diogo",
+    "date": "2026-07-10",
+    "paymentMethod": "credito"
   }
 ]
