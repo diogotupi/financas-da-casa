@@ -256,5 +256,13 @@
     "paidBy": "diogo",
     "date": "2026-06-21",
     "paymentMethod": "credito"
+  },
+  {
+    "id": "64e45ba6-893f-49e3-b6e9-c601c54c3122",
+    "description": "Pão de Açúcar",
+    "amount": 26.88,
+    "paidBy": "diogo",
+    "date": "2026-06-21",
+    "paymentMethod": "credito"
   }
 ]
