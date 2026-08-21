@@ -408,5 +408,13 @@
     "paidBy": "diogo",
     "date": "2026-06-17",
     "paymentMethod": "pix"
+  },
+  {
+    "id": "6c40f558-6150-4078-85aa-4eb904ed1756",
+    "description": "Maçaneta - Chaveiro",
+    "amount": 500,
+    "paidBy": "diogo",
+    "date": "2026-06-21",
+    "paymentMethod": "pix"
   }
 ]
