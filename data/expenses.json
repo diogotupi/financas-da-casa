@@ -464,5 +464,13 @@
     "paidBy": "diogo",
     "date": "2026-07-28",
     "paymentMethod": "credito"
+  },
+  {
+    "id": "5bc9d9d5-29a5-4f30-9488-56d61f94cb82",
+    "description": "Pizza e Chopp Casamento Castor",
+    "amount": 95.7,
+    "paidBy": "diogo",
+    "date": "2026-08-08",
+    "paymentMethod": "credito"
   }
 ]
