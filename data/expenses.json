@@ -296,5 +296,13 @@
     "paidBy": "diogo",
     "date": "2026-06-24",
     "paymentMethod": "credito"
+  },
+  {
+    "id": "4bcc63ec-8085-4465-b609-b85551c010cb",
+    "description": "Pizza iFood",
+    "amount": 75.17,
+    "paidBy": "diogo",
+    "date": "2026-06-26",
+    "paymentMethod": "credito"
   }
 ]
